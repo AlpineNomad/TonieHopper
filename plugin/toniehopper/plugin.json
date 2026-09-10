@@ -1,0 +1,9 @@
+{
+  "pluginName": "TonieHopper",
+  "description": "Kinder wählen Geschichten für ihre feste Tonie-Figur.",
+  "version": "0.2.8",
+  "author": "TonieHopper",
+  "teddyCloudSection": "home",
+  "icon": "SmileOutlined",
+  "standalone": true
+}

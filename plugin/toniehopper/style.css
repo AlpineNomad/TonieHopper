@@ -1,0 +1,233 @@
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 500;
+  font-stretch: normal;
+  src: url(assets/fonts/fredoka-500.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Fredoka';
+  font-style: normal;
+  font-weight: 600;
+  font-stretch: normal;
+  src: url(assets/fonts/fredoka-600.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  src: url(assets/fonts/nunito-400.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  src: url(assets/fonts/nunito-700.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 800;
+  src: url(assets/fonts/nunito-800.ttf) format('truetype');
+}
+#toniehopper-demo{font-family:'Nunito',-apple-system,BlinkMacSystemFont,sans-serif;font-size:16px;line-height:1.45;color:#18294c;width:100%}
+#toniehopper-demo *{box-sizing:border-box}
+#toniehopper-demo button,#toniehopper-demo input,#toniehopper-demo select{font:inherit}
+#toniehopper-demo button{cursor:pointer;color:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#toniehopper-demo button:disabled{cursor:default;opacity:.5}
+#toniehopper-demo button:focus-visible,#toniehopper-demo input:focus-visible,#toniehopper-demo select:focus-visible{outline:3px solid #ec7842;outline-offset:5px}
+#toniehopper-demo .th-app{background:#edf5fc;border-radius:20px;overflow:hidden;border:2px solid #c4d3e9}
+#toniehopper-demo .th-header{display:flex;justify-content:space-between;align-items:center;padding:17px 28px;background:#3454df;color:#fff;border-bottom:5px solid #213aaf}
+#toniehopper-demo .th-brand{display:flex;align-items:center;font-family:'Fredoka',sans-serif;font-size:27px;letter-spacing:-.7px;font-weight:600;border:0;background:transparent;padding:0;min-height:44px;color:#fff}
+#toniehopper-demo .th-wordmark span{color:#ffe052}
+#toniehopper-demo .th-logo{width:30px;height:27px;border-radius:46% 48% 41% 43%;background:#ffe052;display:block;position:relative;transform:rotate(-10deg);margin-top:7px;flex-shrink:0}
+#toniehopper-demo .th-logo:before,#toniehopper-demo .th-logo:after{content:'';position:absolute;top:-13px;width:9px;height:21px;background:#ffe052;border-radius:8px}
+#toniehopper-demo .th-logo:before{left:3px;transform:rotate(-14deg)}
+#toniehopper-demo .th-logo:after{right:3px;transform:rotate(14deg)}
+#toniehopper-demo .th-logo i{position:absolute;left:8px;top:11px;width:3px;height:4px;border-radius:50%;background:#243578;box-shadow:11px 0 #243578}
+#toniehopper-demo .th-quiet{min-height:44px;border:0;background:transparent;padding:8px 10px;display:inline-flex;justify-content:center;align-items:center;font-size:14px;font-weight:800;color:#506080}
+#toniehopper-demo .th-header .th-quiet{color:#fff;background:#233cb0;border-radius:11px;padding:8px 13px}
+#toniehopper-demo .th-main{padding:28px 30px 31px;min-height:480px;position:relative}
+#toniehopper-demo h1,#toniehopper-demo h2,#toniehopper-demo p{margin:0}
+#toniehopper-demo h1,#toniehopper-demo h2,#toniehopper-demo .th-profile-name{font-family:'Fredoka',sans-serif;font-weight:600}
+#toniehopper-demo h1{font-size:43px;line-height:1.06;letter-spacing:-.7px;margin:4px 0 12px}
+#toniehopper-demo h2{font-size:29px;line-height:1.13}
+#toniehopper-demo .th-subtitle{font-size:17px;color:#506080;font-weight:700}
+#toniehopper-demo .th-center{text-align:center}
+#toniehopper-demo .th-home-title{position:relative;display:inline-block}
+#toniehopper-demo .th-home-title:before,#toniehopper-demo .th-home-title:after{content:'';position:absolute;background:#fa795b;width:8px;height:23px;transform:rotate(-30deg);left:-25px;top:8px;border-radius:3px}
+#toniehopper-demo .th-home-title:after{left:auto;right:-25px;transform:rotate(30deg);background:#42b7ad}
+#toniehopper-demo .th-profiles{display:flex;flex-wrap:wrap;margin:24px 0 18px}
+#toniehopper-demo .th-profile{flex:0 0 calc((100% - 28px)/2);min-width:0;background:transparent;border:0;padding:0 8px 10px;position:relative;transition:transform .18s}
+#toniehopper-demo .th-profile:hover{transform:translateY(-5px)}
+#toniehopper-demo .th-figure-field{height:209px;position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:-10px}
+#toniehopper-demo .th-figure-field:before{content:'';position:absolute;left:50%;top:50%;width:192px;height:192px;background:#fff0bf;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none}
+#toniehopper-demo .th-profile:nth-child(even) .th-figure-field:before{background:#d0eee7}
+#toniehopper-demo .th-figure-field:after{content:'';position:absolute;top:calc(50% + 64px);left:50%;width:72px;height:8px;transform:translateX(-50%);background:rgba(38,57,87,0.125);border-radius:50%;filter:blur(3px);z-index:0;pointer-events:none}
+#toniehopper-demo .th-figure-img{display:block;max-width:100%;max-height:100%;object-fit:contain;position:relative;z-index:1;filter:drop-shadow(0 4px 2px rgba(26,37,83,0.137))}
+/* Keep profile artwork within its backdrop bounds, including transparent image margins. */
+#toniehopper-demo .th-figure-field>.th-figure-img{width:192px;height:192px;padding:6px;flex-shrink:0}
+#toniehopper-demo .th-profile-line{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;min-height:65px;width:100%;max-width:280px;margin:0 auto;border:3px solid #20346d;border-radius:16px;box-shadow:0 6px 0 #20346d;background:#ffe052;color:#18294c;transform:rotate(-3deg);padding:8px 16px}
+#toniehopper-demo .th-profile:nth-child(even) .th-profile-line{background:#a4e3d6;transform:rotate(3deg)}
+#toniehopper-demo .th-profile-name{font-size:36px;line-height:1.1;min-width:0;flex:0 1 auto;white-space:nowrap;word-break:normal;overflow-wrap:normal}
+#toniehopper-demo .th-arrow{display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#toniehopper-demo .th-assigned{display:flex;align-items:center;justify-content:center;margin-top:21px;font-size:13px;color:#506080}
+#toniehopper-demo .th-assigned img{height:34px;width:38px;object-fit:contain}
+#toniehopper-demo .th-assigned small{display:block;font-size:11px;font-weight:700}
+#toniehopper-demo .th-assigned span{display:block;font-size:13px;font-weight:900;color:#18294c}
+#toniehopper-demo .th-home-note{text-align:center;font-size:14px;color:#506080;font-weight:700}
+#toniehopper-demo .th-help{display:flex;justify-content:center;margin-top:17px}
+#toniehopper-demo .th-help button{border:0;border-bottom:2px dashed #c4d3e9;border-radius:0;font-size:13px;padding:4px 9px;color:#2846c1;background:transparent;min-height:44px;display:flex;align-items:center;font-weight:800}
+#toniehopper-demo .th-page-top{display:flex;justify-content:space-between;align-items:center;margin:-8px 0 19px}
+#toniehopper-demo .th-back{min-height:44px;display:inline-flex;align-items:center;background:transparent;border:0;padding:0;font-size:14px;font-weight:900}
+#toniehopper-demo .th-step{font-size:11px;font-weight:900;color:#2846c1;text-transform:uppercase;letter-spacing:.5px}
+#toniehopper-demo .th-library-heading{display:flex;justify-content:space-between;align-items:center;}
+#toniehopper-demo .th-library-heading h1{font-size:38px}
+#toniehopper-demo .th-child-chip{display:flex;align-items:center;background:#ffe052;color:#18294c;border:2px solid #20346d;box-shadow:0 3px 0 #20346d;border-radius:12px;min-height:48px;padding:4px 13px 4px 3px;font-size:15px;font-weight:900;transform:rotate(3deg)}
+#toniehopper-demo .th-child-chip img{width:40px;height:40px;object-fit:contain}
+#toniehopper-demo .th-shelves,#toniehopper-demo .th-parent-nav{display:flex;flex-wrap:wrap;margin:19px 0 23px}
+#toniehopper-demo .th-shelf{display:flex;align-items:center;justify-content:center;padding:10px 17px;min-height:47px;background:transparent;border:2px solid #c4d3e9;border-radius:11px;font-size:15px;font-weight:900}
+#toniehopper-demo .th-shelf[aria-pressed=true]{background:#3454df;color:#fff;border-color:#203ab3;box-shadow:0 3px 0 #203ab3}
+#toniehopper-demo .th-grid{display:flex;flex-wrap:wrap;align-items:flex-start}
+#toniehopper-demo .th-content{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;width:calc((100% - 34px)/3);min-width:0;background:transparent;border:0;padding:0;text-align:center;transition:transform .18s}
+#toniehopper-demo button.th-content:hover{transform:translateY(-5px) rotate(-2deg)}
+#toniehopper-demo .th-cover{width:100%;height:148px;flex-shrink:0;padding:12px;display:flex;align-items:center;justify-content:center;position:relative;border-radius:25px 25px 14px 14px;background:#f9df91;border-bottom:5px solid #d9b452}
+#toniehopper-demo .th-cover img{display:block;height:100%;width:100%;max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 4px 2px rgba(23,40,74,0.094))}
+#toniehopper-demo .th-content:nth-child(3n+2) .th-cover{background:#b4dede;border-bottom-color:#72bab9}
+#toniehopper-demo .th-content:nth-child(3n+3) .th-cover{background:#cfc5f3;border-bottom-color:#a394d6}
+#toniehopper-demo .th-content-title{display:block;font-size:17px;font-family:'Fredoka',sans-serif;font-weight:500;line-height:1.15;margin:11px 0 4px;overflow-wrap:break-word}
+#toniehopper-demo .th-primary{display:inline-flex;justify-content:center;align-items:center;min-height:61px;max-width:100%;padding:12px 28px;border:3px solid #20346d;border-radius:16px;background:#ffe052;color:#18294c;box-shadow:0 6px 0 #20346d;font-family:'Fredoka',sans-serif;font-size:23px;font-weight:500;transition:transform .15s}
+#toniehopper-demo .th-primary:active{transform:translateY(3px);box-shadow:0 3px 0 #20346d}
+#toniehopper-demo .th-secondary{display:inline-flex;justify-content:center;align-items:center;min-height:46px;padding:10px 16px;border:2px solid #c4d3e9;border-radius:11px;background:#ffffff;font-size:14px;font-weight:900}
+#toniehopper-demo .th-actions{display:flex;justify-content:center;align-items:center;margin-top:23px;flex-wrap:wrap}
+#toniehopper-demo .th-transfer{display:flex;justify-content:center;align-items:center;margin:29px 0 25px}
+#toniehopper-demo .th-transfer-tile{width:195px;min-width:0;text-align:center}
+#toniehopper-demo .th-transfer-image{width:100%;height:188px;padding:28px;background:#ffe480;border-radius:40% 43% 31% 36%;display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative}
+#toniehopper-demo .th-transfer-image img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 4px 2px rgba(29,37,75,0.133))}
+#toniehopper-demo .th-transfer-tile strong{display:block;font-family:'Fredoka',sans-serif;font-size:24px;font-weight:500;line-height:1.15}
+#toniehopper-demo .th-transfer-tile small{display:block;font-size:12px;color:#506080;margin-top:4px}
+#toniehopper-demo .th-transfer-arrow{width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:#3454df;color:#fff;border-radius:50%;flex-shrink:0;margin-top:-45px;box-shadow:0 4px 0 #203ab3}
+#toniehopper-demo .th-hint{display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#506080;text-align:center}
+#toniehopper-demo .th-refresh-layout{display:flex;align-items:center;margin:21px 0 9px}
+#toniehopper-demo .th-refresh-visual{width:56%;height:320px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#d2e7f6;border-radius:42% 38% 22% 23%;position:relative;overflow:visible}
+#toniehopper-demo .th-refresh-copy{flex:1;min-width:0}
+#toniehopper-demo .th-refresh-copy h2{font-size:31px;margin:8px 0 12px}
+#toniehopper-demo .th-refresh-copy p{font-size:16px;color:#506080;line-height:1.5;font-weight:700}
+#toniehopper-demo .th-instruction-tag{display:inline-block;background:#ffe052;color:#18294c;border-radius:7px;padding:4px 9px;font-size:12px;font-weight:900;transform:rotate(-3deg)}
+#toniehopper-demo .th-dots{display:flex;align-items:center;justify-content:center;margin:15px 0 0}
+#toniehopper-demo .th-dot{width:45px;height:45px;border:2px solid #c4d3e9;border-radius:13px;background:#ffffff;font-size:20px;font-weight:600;font-family:'Fredoka',sans-serif;display:flex;align-items:center;justify-content:center}
+#toniehopper-demo .th-dot[aria-current=step]{background:#3454df;color:#fff;border-color:#203ab3;box-shadow:0 4px 0 #203ab3;transform:rotate(-5deg)}
+#toniehopper-demo .th-library-example{display:flex;align-items:center;justify-content:center;flex-direction:column;width:100%;height:100%;border-radius:inherit;position:relative;color:#18294c}
+#toniehopper-demo .th-library-example:before{content:'';position:absolute;top:23px;bottom:23px;left:28px;right:28px;background:#ffffff;border-radius:7px 14px 14px 7px;border-left:8px solid #3454df;box-shadow:3px 4px 0 rgba(32,52,109,0.22);transform:rotate(-6deg)}
+#toniehopper-demo .th-library-example svg,#toniehopper-demo .th-example-label{position:relative;z-index:1}
+#toniehopper-demo .th-example-label{font-size:10px;font-weight:900;letter-spacing:.4px;text-transform:uppercase;margin-top:9px;text-align:center;max-width:95px}
+#toniehopper-demo .th-parent-row{display:flex;align-items:center;padding:16px 0;border-bottom:2px solid #c4d3e9}
+#toniehopper-demo .th-parent-row img{width:64px;height:74px;object-fit:contain;background:#ffe480;border-radius:18px}
+#toniehopper-demo .th-parent-row .th-grow{flex:1;min-width:0}
+#toniehopper-demo .th-parent-row strong{font-family:'Fredoka',sans-serif;font-size:24px;font-weight:500}
+#toniehopper-demo .th-parent-row p{font-size:13px;color:#506080;margin-top:3px}
+#toniehopper-demo .th-label{display:block;font-size:13px;font-weight:900;margin-bottom:6px;color:#506080}
+#toniehopper-demo .th-input{width:100%;min-height:48px;padding:10px 12px;border:2px solid #c4d3e9;border-radius:10px;background:#ffffff;color:#18294c;font-size:16px}
+#toniehopper-demo .th-form{display:flex;align-items:flex-end;margin:20px 0;flex-wrap:wrap}
+#toniehopper-demo .th-form>div{flex:1;min-width:180px}
+#toniehopper-demo .th-admin-note{font-size:13px;line-height:1.5;color:#506080;margin-top:17px}
+#toniehopper-demo .th-success-mark{height:91px;width:91px;border-radius:26px;background:#ffe052;color:#18294c;display:flex;align-items:center;justify-content:center;margin:18px auto 23px;border:3px solid #20346d;box-shadow:0 6px 0 #20346d;transform:rotate(-8deg)}
+#toniehopper-demo .th-figure-placeholder{font-size:58px}
+@media(prefers-reduced-motion:reduce){#toniehopper-demo *{animation:none!important;transition:none!important}}
+@media(max-width:570px){
+ #toniehopper-demo .th-header{padding:15px 17px}#toniehopper-demo .th-brand{font-size:23px;}#toniehopper-demo .th-header .th-quiet{font-size:12px;padding:8px 10px}
+ #toniehopper-demo .th-main{padding:24px 18px 28px;min-height:450px}#toniehopper-demo h1{font-size:37px}#toniehopper-demo .th-subtitle{font-size:15px}#toniehopper-demo .th-home-title:before,#toniehopper-demo .th-home-title:after{display:none}
+ #toniehopper-demo .th-profiles{margin-top:22px}#toniehopper-demo .th-profile{flex-basis:calc((100% - 16px)/2);padding:0 0 8px}#toniehopper-demo .th-figure-field{height:173px}#toniehopper-demo .th-figure-field>.th-figure-img{width:168px;height:168px}#toniehopper-demo .th-profile-line{min-height:57px;padding:7px 9px;}#toniehopper-demo .th-profile-name{font-size:29px}#toniehopper-demo .th-assigned img{display:none}#toniehopper-demo .th-assigned span{font-size:12px}
+ #toniehopper-demo .th-library-heading h1{font-size:33px}#toniehopper-demo .th-library-heading{align-items:flex-start}#toniehopper-demo .th-child-chip{font-size:12px;padding:3px 8px 3px 0;min-height:44px}#toniehopper-demo .th-child-chip img{width:32px;height:32px}#toniehopper-demo .th-shelf{font-size:13px;padding:10px 12px}
+ #toniehopper-demo .th-content{width:calc((100% - 17px)/2)}#toniehopper-demo .th-cover{height:153px;padding:10px}#toniehopper-demo .th-content-title{font-size:17px}
+ #toniehopper-demo .th-transfer-tile{width:42%}#toniehopper-demo .th-transfer-image{height:148px;padding:20px}#toniehopper-demo .th-transfer-tile strong{font-size:20px}#toniehopper-demo .th-transfer-arrow{height:32px;width:32px}
+ #toniehopper-demo .th-primary{font-size:21px;padding:11px 20px}#toniehopper-demo .th-refresh-layout{flex-direction:column;}#toniehopper-demo .th-refresh-visual{width:100%;max-width:355px;height:310px}#toniehopper-demo .th-refresh-copy{text-align:center}#toniehopper-demo .th-refresh-copy h2{font-size:31px;margin:9px 0}#toniehopper-demo .th-page-top{margin-bottom:13px}#toniehopper-demo .th-step{font-size:10px}#toniehopper-demo .th-parent-row{flex-wrap:wrap}
+}
+@media(max-width:360px){#toniehopper-demo .th-main{padding:22px 13px 25px}#toniehopper-demo .th-brand{font-size:21px}#toniehopper-demo .th-header{padding:13px 12px}#toniehopper-demo .th-logo{height:25px;width:27px}#toniehopper-demo .th-header .th-quiet svg{display:none}#toniehopper-demo h1{font-size:33px}#toniehopper-demo .th-figure-field{height:156px}#toniehopper-demo .th-figure-field>.th-figure-img{height:152px;width:152px}#toniehopper-demo .th-profile-name{font-size:27px}#toniehopper-demo .th-profile-line{border-radius:12px}#toniehopper-demo .th-cover{height:136px;padding:8px}#toniehopper-demo .th-home-note{font-size:12px}#toniehopper-demo .th-library-heading h1{font-size:30px}}
+@media(max-width:480px){
+ #toniehopper-demo .th-profile{flex-basis:100%;padding:0 8px 10px}
+ #toniehopper-demo .th-profile-line{min-height:65px;padding:8px 16px;}
+ #toniehopper-demo .th-profile-name{font-size:34px}
+ #toniehopper-demo .th-figure-field{max-width:310px;margin-left:auto;margin-right:auto}
+}
+@media(max-width:570px){
+ #toniehopper-demo .th-figure-field:before{width:168px;height:168px}
+ #toniehopper-demo .th-figure-field:after{top:calc(50% + 56px);width:64px;height:8px}
+}
+@media(max-width:360px){
+ #toniehopper-demo .th-figure-field:before{width:152px;height:152px}
+ #toniehopper-demo .th-figure-field:after{top:calc(50% + 50px);width:58px}
+}
+/* Standalone layout and Safari 9 fallbacks: no CSS variables or flex gap. */
+html,body{margin:0;min-height:100%;background:#edf5fc;-webkit-text-size-adjust:100%}
+#toniehopper-demo{max-width:1050px;margin:0 auto}
+#toniehopper-demo .th-app{min-height:100vh;border:0;border-radius:0}
+#toniehopper-demo .th-main{max-width:920px;margin:0 auto;outline:0;padding-bottom:45px}
+#toniehopper-demo .th-icon{width:24px;height:24px;display:inline-block;vertical-align:middle;flex-shrink:0}
+#toniehopper-demo .th-brand .th-logo{margin-right:12px}
+#toniehopper-demo button>.th-icon:first-child{margin-right:8px}
+#toniehopper-demo button>.th-icon:last-child:not(:first-child){margin-left:8px}
+#toniehopper-demo .th-profiles{margin-left:-14px;margin-right:-14px}
+#toniehopper-demo .th-profile{flex-basis:50%;width:50%;padding-left:14px;padding-right:14px;margin-bottom:28px}
+#toniehopper-demo .th-arrow{margin-left:14px}
+#toniehopper-demo .th-assigned>img{margin-right:7px}
+#toniehopper-demo .th-shelves,#toniehopper-demo .th-parent-nav{margin-bottom:13px}
+#toniehopper-demo .th-shelves>*,#toniehopper-demo .th-parent-nav>*{margin-right:10px;margin-bottom:10px}
+#toniehopper-demo .th-child-chip{margin-left:14px}
+#toniehopper-demo .th-grid{margin-left:-9px;margin-right:-9px}
+#toniehopper-demo .th-content{width:33.3333%;padding:0 9px;margin-bottom:24px}
+#toniehopper-demo .th-content-title{word-wrap:break-word}
+#toniehopper-demo .th-actions>button{margin:7px}
+#toniehopper-demo .th-transfer-arrow{margin-left:19px;margin-right:19px}
+#toniehopper-demo .th-transfer-figure{background:#cdecef}
+#toniehopper-demo .th-hint>.th-icon{margin-right:8px}
+#toniehopper-demo .th-refresh-layout{display:block}
+#toniehopper-demo .th-refresh-visual{width:100%;height:auto;max-width:600px;margin:0 auto;background:transparent;border-radius:0;overflow:hidden;display:block}
+#toniehopper-demo #th-animation{width:100%;min-height:240px}
+#toniehopper-demo .th-refresh-copy{text-align:center;max-width:600px;margin:12px auto 0}
+#toniehopper-demo .th-refresh-copy h2{font-size:32px}
+#toniehopper-demo .th-refresh-copy p{font-size:17px}
+#toniehopper-demo .th-dots>button{margin:0 6px}
+#toniehopper-demo .th-guide-note{font-size:13px;text-align:center;color:#506080;margin-top:18px}
+#toniehopper-demo .th-figure-placeholder>.th-icon{width:76px;height:76px;color:#3454df}
+#toniehopper-demo .th-parent-row>img{margin-right:14px}
+#toniehopper-demo .th-parent-row>button{margin-left:8px}
+#toniehopper-demo .th-form>div{margin-right:14px;margin-bottom:14px}
+#toniehopper-demo .th-form>div:last-child{margin-right:0}
+#toniehopper-demo .th-search{margin:0 0 12px;background:#fff}
+#toniehopper-demo .th-results-count{margin:0 0 18px;color:#64728a;font-size:13px;font-weight:700}
+#toniehopper-demo .th-error{padding:15px 18px;background:#fff0ee;border:2px solid #da6e5f;border-radius:12px;margin:20px 0;color:#7b251c;font-weight:700}
+#toniehopper-demo .th-empty{padding:35px 10px}
+#toniehopper-demo .th-empty>.th-icon{width:70px;height:70px;color:#3454df;margin-bottom:20px}
+#toniehopper-demo .th-empty h2{margin-bottom:14px}
+#toniehopper-demo .th-empty p{max-width:490px;margin:0 auto;color:#506080;font-size:17px}
+#toniehopper-demo .th-draft-note{padding:12px 15px;background:#fff0bf;border-radius:10px;font-size:14px;margin:18px 0;color:#5a4710;font-weight:700}
+#toniehopper-demo .th-approval-list{margin-top:20px}
+#toniehopper-demo .th-approval-row{display:flex;align-items:center;border-bottom:1px solid #d8e2ed;padding:12px;background:transparent}
+#toniehopper-demo .th-approval-row label{display:flex;align-items:center;flex:1;min-width:0;cursor:pointer;min-height:56px}
+#toniehopper-demo .th-approval-row label>input{-webkit-appearance:none;appearance:none;display:block;width:22px;height:22px;flex-shrink:0;margin:0 12px 0 0;border:2px solid #94a5bb;border-radius:6px;background-color:#fff;background-position:center;background-repeat:no-repeat;background-size:16px 16px;cursor:pointer}
+#toniehopper-demo .th-approval-row label>input:checked{border-color:#3454df;background-color:#3454df;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M3 8l3 3 7-7' fill='none' stroke='%23fff' stroke-width='2.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+#toniehopper-demo .th-approval-row label>img,#toniehopper-demo .th-approval-row .th-library-example{width:44px;height:52px;padding:4px;object-fit:contain;flex-shrink:0;margin-right:12px;background:#e4edf4;border-radius:8px}
+#toniehopper-demo .th-approval-row .th-library-example:before,#toniehopper-demo .th-approval-row .th-example-label{display:none}
+#toniehopper-demo .th-approval-row .th-story-info{display:block;flex:1;min-width:0;word-wrap:break-word}
+#toniehopper-demo .th-approval-row strong{display:block;font-size:16px;line-height:1.3;font-weight:800;word-wrap:break-word}
+#toniehopper-demo .th-approval-row small{display:block;color:#68778e;font-size:12px;line-height:1.3;margin-top:4px}
+#toniehopper-demo .th-approval-row .th-visibility-label{display:inline-block;flex-shrink:0;margin-left:12px;padding:4px 8px;border-radius:12px;background:#e5f1ed;color:#42756c;font-size:11px;font-weight:800;line-height:1.3;white-space:nowrap}
+#toniehopper-demo .th-approval-row.th-is-hidden .th-visibility-label{background:#e9edf2;color:#617086}
+#toniehopper-demo .th-approval-row>button{flex-shrink:0;margin-left:12px;font-size:12px}
+#toniehopper-demo .th-config-copy p{margin:15px 0;line-height:1.65}
+#toniehopper-demo .th-import-label{margin-top:28px}
+#toniehopper-demo .th-json{height:270px;font:13px monospace;resize:vertical;background:#fff}
+#toniehopper-demo .th-download-link{display:inline-block;color:#2846c1;font-weight:800;padding:12px 0}
+#toniehopper-demo button:focus,#toniehopper-demo input:focus,#toniehopper-demo select:focus{outline:3px solid #ec7842;outline-offset:3px}
+#toniehopper-demo .th-sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+@media(min-width:900px){#toniehopper-demo .th-main{padding-top:40px}#toniehopper-demo .th-figure-field{height:245px}#toniehopper-demo .th-figure-field:before{width:224px;height:224px}#toniehopper-demo .th-figure-field>.th-figure-img{width:224px;height:224px}#toniehopper-demo .th-figure-field:after{top:calc(50% + 76px);width:88px}#toniehopper-demo .th-profile-line{max-width:310px}}
+@media(max-width:570px){#toniehopper-demo .th-content{width:50%}#toniehopper-demo .th-transfer-arrow{margin-left:11px;margin-right:11px}#toniehopper-demo .th-parent-nav>*{font-size:13px;padding:10px}#toniehopper-demo .th-refresh-visual{max-width:500px}#toniehopper-demo .th-parent-row .th-grow{width:60%}}
+@media(max-width:570px){
+ #toniehopper-demo .th-approval-row{flex-wrap:wrap;align-items:flex-start}
+ #toniehopper-demo .th-approval-row label{position:relative;flex-basis:100%;width:100%;padding-bottom:28px}
+ #toniehopper-demo .th-approval-row strong{font-size:15px}
+ #toniehopper-demo .th-approval-row .th-visibility-label{position:absolute;left:90px;bottom:0;margin-left:0}
+ #toniehopper-demo .th-approval-row>button{margin:6px 0 0 90px;padding:4px 0;min-height:40px;justify-content:flex-start}
+}
+@media(max-width:480px){#toniehopper-demo .th-profile{flex-basis:100%;width:100%;padding-left:8px;padding-right:8px}#toniehopper-demo .th-profiles{margin-left:0;margin-right:0}}

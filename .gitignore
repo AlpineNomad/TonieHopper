@@ -1,0 +1,19 @@
+# Local caches and generated output
+.DS_Store
+._*
+__pycache__/
+*.py[cod]
+node_modules/
+/dist/
+/tests/artifacts/
+.local/
+*.local.json
+.env
+.env.*
+!.env.example
+
+# Private drafts, deployment snapshots and published personal configuration
+/research/
+/design-*/
+/plugin/toniehopper/config.json
+*.bundle

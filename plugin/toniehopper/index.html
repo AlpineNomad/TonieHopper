@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="TonieHopper">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#3454df">
+  <title>TonieHopper</title>
+  <link rel="apple-touch-icon" href="assets/app-icon.png">
+  <link rel="stylesheet" href="style.css?v=0.2.8">
+  <link rel="stylesheet" href="forms.css?v=0.2.8">
+</head>
+<body>
+  <div id="toniehopper-demo">
+    <div class="th-app">
+      <header class="th-header">
+        <button class="th-brand" type="button" data-action="home" aria-label="TonieHopper Startseite"><span class="th-logo" aria-hidden="true"><i></i></span><span class="th-wordmark">Tonie<span>Hopper</span></span></button>
+        <button class="th-quiet" type="button" data-action="parents">Für Eltern</button>
+      </header>
+      <main class="th-main" id="th-screen" tabindex="-1"><div class="th-center"><h1>Hallo, Hörabenteuer!</h1><p>Deine Tonies werden geladen …</p></div></main>
+      <div id="th-announcer" class="th-sr-only" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+  <noscript>Bitte aktiviere JavaScript, um TonieHopper zu benutzen.</noscript>
+  <script src="js/api.js?v=0.2.8"></script>
+  <script src="js/config.js?v=0.2.8"></script>
+  <script src="js/catalog.js?v=0.2.8"></script>
+  <script src="js/figures.js?v=0.2.8"></script>
+  <script src="js/animation.js"></script>
+  <script src="js/app.js?v=0.2.8"></script>
+</body>
+</html>

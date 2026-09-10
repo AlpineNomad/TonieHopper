@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "profiles": [
+    {"id": "demo-mia", "name": "Mia", "ruid": "e000000000000001", "overlay": null},
+    {"id": "demo-ben", "name": "Ben", "ruid": "e000000000000002", "overlay": null}
+  ],
+  "library": {"path": "/", "hiddenSources": [], "entries": []}
+}

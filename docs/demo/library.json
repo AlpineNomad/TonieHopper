@@ -1,0 +1,261 @@
+{
+  "catalog": [
+    {
+      "model": "11000430",
+      "age": 3,
+      "category": "tonie"
+    },
+    {
+      "model": "01-0184",
+      "age": 3,
+      "category": "tonie"
+    },
+    {
+      "model": "10000890",
+      "age": 4,
+      "category": "tonie"
+    },
+    {
+      "model": "01-0127",
+      "age": 3,
+      "category": "tonie"
+    },
+    {
+      "model": "01-0161",
+      "age": 3,
+      "category": "tonie"
+    },
+    {
+      "model": "10000992",
+      "age": 3,
+      "category": "tonie"
+    },
+    {
+      "model": "10000284",
+      "age": null,
+      "category": "creative"
+    },
+    {
+      "model": "02-0007",
+      "age": null,
+      "category": "creative"
+    }
+  ],
+  "files": [
+    {
+      "name": "demo-dino-ranch.taf",
+      "isDir": false,
+      "size": 42000000,
+      "tonieInfo": {
+        "model": "11000430",
+        "series": "Dino Ranch",
+        "episode": "Mächtig Ärger für Jon & 3 weitere Abenteuer",
+        "age": 3,
+        "picture": "/demo/covers/dino-ranch.png",
+        "language": "de-de"
+      },
+      "tafHeader": {
+        "valid": true,
+        "audioId": 1,
+        "sha1Hash": "0000000000000000000000000000000000000001",
+        "trackSeconds": [
+          0,
+          120,
+          240
+        ]
+      }
+    },
+    {
+      "name": "demo-cars.taf",
+      "isDir": false,
+      "size": 42000000,
+      "tonieInfo": {
+        "model": "01-0184",
+        "series": "Disney",
+        "episode": "Cars",
+        "age": 3,
+        "picture": "/demo/covers/cars.png",
+        "language": "de-de"
+      },
+      "tafHeader": {
+        "valid": true,
+        "audioId": 2,
+        "sha1Hash": "0000000000000000000000000000000000000002",
+        "trackSeconds": [
+          0,
+          120,
+          240
+        ]
+      }
+    },
+    {
+      "name": "demo-neinhorn.taf",
+      "isDir": false,
+      "size": 42000000,
+      "tonieInfo": {
+        "model": "10000890",
+        "series": "Das NEINhorn",
+        "episode": "Das NEINhorn & Das NEINhorn und die SchLANGEWEILE",
+        "age": 4,
+        "picture": "/demo/covers/neinhorn.png",
+        "language": "de-de"
+      },
+      "tafHeader": {
+        "valid": true,
+        "audioId": 3,
+        "sha1Hash": "0000000000000000000000000000000000000003",
+        "trackSeconds": [
+          0,
+          120,
+          240
+        ]
+      }
+    },
+    {
+      "name": "demo-lieselotte.taf",
+      "isDir": false,
+      "size": 42000000,
+      "tonieInfo": {
+        "model": "01-0127",
+        "series": "Lieselotte",
+        "episode": "Ein Geburtstagsfest für Lieselotte und andere Geschichten",
+        "age": 3,
+        "picture": "/demo/covers/lieselotte.png",
+        "language": "de-de"
+      },
+      "tafHeader": {
+        "valid": true,
+        "audioId": 4,
+        "sha1Hash": "0000000000000000000000000000000000000004",
+        "trackSeconds": [
+          0,
+          120,
+          240
+        ]
+      }
+    },
+    {
+      "name": "demo-maus.taf",
+      "isDir": false,
+      "size": 42000000,
+      "tonieInfo": {
+        "model": "01-0161",
+        "series": "Maus",
+        "episode": "Mit der Maus die Welt entdecken",
+        "age": 3,
+        "picture": "/demo/covers/maus.png",
+        "language": "de-de"
+      },
+      "tafHeader": {
+        "valid": true,
+        "audioId": 5,
+        "sha1Hash": "0000000000000000000000000000000000000005",
+        "trackSeconds": [
+          0,
+          120,
+          240
+        ]
+      }
+    },
+    {
+      "name": "demo-schlummerschaf.taf",
+      "isDir": false,
+      "size": 42000000,
+      "tonieInfo": {
+        "model": "10000992",
+        "series": "Schlummerbande",
+        "episode": "Schlummerschaf - Einschlafmelodien aus dem Zauberwald",
+        "age": 3,
+        "picture": "/demo/covers/schlummerschaf.png",
+        "language": "de-de"
+      },
+      "tafHeader": {
+        "valid": true,
+        "audioId": 6,
+        "sha1Hash": "0000000000000000000000000000000000000006",
+        "trackSeconds": [
+          0,
+          120,
+          240
+        ]
+      }
+    },
+    {
+      "name": "demo-waldabenteuer.taf",
+      "isDir": false,
+      "size": 42000000,
+      "tonieInfo": {
+        "model": "",
+        "series": "",
+        "episode": "Waldabenteuer",
+        "age": null,
+        "picture": "",
+        "language": "de-de"
+      },
+      "tafHeader": {
+        "valid": true,
+        "audioId": 7,
+        "sha1Hash": "0000000000000000000000000000000000000007",
+        "trackSeconds": [
+          0,
+          120,
+          240
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "ruid": "e000000000000001",
+      "type": "tag",
+      "exists": true,
+      "valid": true,
+      "hide": false,
+      "claimed": false,
+      "nocloud": true,
+      "live": false,
+      "source": "lib://demo-dino-ranch.taf",
+      "tonieInfo": {
+        "model": "10000284",
+        "series": "Kreativ-Tonie",
+        "episode": "Detektiv",
+        "picture": "/demo/covers/kreativ-detektiv.png",
+        "language": "de-de"
+      },
+      "sourceInfo": {
+        "model": "11000430",
+        "series": "Dino Ranch",
+        "episode": "Mächtig Ärger für Jon & 3 weitere Abenteuer",
+        "age": 3,
+        "picture": "/demo/covers/dino-ranch.png",
+        "language": "de-de"
+      }
+    },
+    {
+      "ruid": "e000000000000002",
+      "type": "tag",
+      "exists": true,
+      "valid": true,
+      "hide": false,
+      "claimed": false,
+      "nocloud": true,
+      "live": false,
+      "source": "lib://demo-cars.taf",
+      "tonieInfo": {
+        "model": "02-0007",
+        "series": "Kreativ-Tonie",
+        "episode": "Pirat",
+        "picture": "/demo/covers/kreativ-pirat.png",
+        "language": "de-de"
+      },
+      "sourceInfo": {
+        "model": "01-0184",
+        "series": "Disney",
+        "episode": "Cars",
+        "age": 3,
+        "picture": "/demo/covers/cars.png",
+        "language": "de-de"
+      }
+    }
+  ]
+}
