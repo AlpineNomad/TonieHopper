@@ -9,6 +9,7 @@
     var activeAssignments = {};
     var catalogModels = Object.create(null);
     var catalogSystemModels = Object.create(null);
+    var catalogAudioKinds = Object.create(null);
     var catalogAges = Object.create(null);
     var TIMEOUT = 15000;
     var MAX_DIRECTORIES = 500;
@@ -165,22 +166,26 @@
 
     function contentKind(content) {
         var model = normalizeModel(content && content.model);
-        return model && catalogModels['$' + model] === true && !isSystemContent(content) ? 'tonie' : 'taf';
+        var identity = contentIdentity(content);
+        var recognized = model && catalogModels['$' + model] === true;
+        return (recognized || identity && catalogAudioKinds['$' + identity] === 'tonie') && !isSystemContent(content) ? 'tonie' : 'taf';
     }
 
     function isSystemContent(content) {
         content = content || {};
         var model = normalizeModel(content.model);
-        return /^box-/i.test(model) || catalogSystemModels['$' + model] === true || normalizeCategory(content.category) === 'system';
+        var identity = contentIdentity(content);
+        var audioKind = identity && catalogAudioKinds['$' + identity];
+        return /^box-/i.test(model) || catalogSystemModels['$' + model] === true || normalizeCategory(content.category) === 'system' || audioKind === 'system' || audioKind === 'ambiguous';
     }
 
     function loadCatalog(callback) {
         request('GET', withQuery('/api/toniesJson', {}), null, true, function (error, data) {
-            var models = Object.create(null), systemModels = Object.create(null), ages = Object.create(null), suppliedAges = Object.create(null), modelCount = 0, systemModelCount = 0;
+            var models = Object.create(null), systemModels = Object.create(null), audioKinds = Object.create(null), ages = Object.create(null), suppliedAges = Object.create(null), modelCount = 0, systemModelCount = 0, audioIdentityCount = 0;
             if (error) { callback(error); return; }
             if (!Array.isArray(data)) { callback(problem('INVALID_CATALOG', 'TeddyCloud liefert keinen gültigen Tonie-Katalog.')); return; }
             data.forEach(function (entry) {
-                var model, key, age;
+                var model, key, age, system, audioIds, hashes, pairCount, i, identity, identityKey, kind;
                 if (!entry || typeof entry !== 'object' || Array.isArray(entry)) { return; }
                 model = normalizeModel(entry.model);
                 if (!model) { return; }
@@ -192,9 +197,21 @@
                 if (!Object.prototype.hasOwnProperty.call(ages, key)) { ages[key] = age; }
                 else if (ages[key] !== age) { ages[key] = null; }
                 if (models[key] !== true) { models[key] = true; modelCount += 1; }
-                if ((/^box-/i.test(model) || normalizeCategory(entry.category) === 'system') && systemModels[key] !== true) {
+                system = /^box-/i.test(model) || normalizeCategory(entry.category) === 'system';
+                if (system && systemModels[key] !== true) {
                     systemModels[key] = true;
                     systemModelCount += 1;
+                }
+                audioIds = Array.isArray(entry.audio_id) ? entry.audio_id : entry.audio_id == null ? [] : [entry.audio_id];
+                hashes = Array.isArray(entry.hash) ? entry.hash : entry.hash == null ? [] : [entry.hash];
+                pairCount = Math.min(audioIds.length, hashes.length);
+                kind = system ? 'system' : 'tonie';
+                for (i = 0; i < pairCount; i += 1) {
+                    identity = contentIdentity({ audioId: audioIds[i], sha1Hash: hashes[i] });
+                    if (!identity) { continue; }
+                    identityKey = '$' + identity;
+                    if (!audioKinds[identityKey]) { audioKinds[identityKey] = kind; audioIdentityCount += 1; }
+                    else if (audioKinds[identityKey] !== kind) { audioKinds[identityKey] = 'ambiguous'; }
                 }
             });
             if (!modelCount) { callback(problem('INVALID_CATALOG', 'Der Tonie-Katalog enthält keine verwendbaren Modelle.')); return; }
@@ -219,8 +236,9 @@
                 }
                 catalogModels = models;
                 catalogSystemModels = systemModels;
+                catalogAudioKinds = audioKinds;
                 catalogAges = ages;
-                callback(null, { modelCount: modelCount, systemModelCount: systemModelCount, ageDataAvailable: !!ageDataAvailable });
+                callback(null, { modelCount: modelCount, systemModelCount: systemModelCount, audioIdentityCount: audioIdentityCount, ageDataAvailable: !!ageDataAvailable });
             });
         });
     }

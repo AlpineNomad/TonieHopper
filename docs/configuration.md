@@ -38,6 +38,8 @@ Die veröffentlichte Datei enthält Profil- und Bibliotheksdaten und ist für Ge
 
 Alle neuen Geschichten sind zunächst sichtbar, sofern sie zum Inhaltsbereich der jeweiligen Box gehören oder Teil der gemeinsamen eigenen Hörwelt sind. Im Reiter **Geschichten** bedeutet ein Haken **Für alle Kinder ausgeblendet**. Diese Auswahl gilt gemeinsam für sämtliche Kinder, einschließlich erkannter Kopien derselben Geschichte.
 
+Original-Tonies, die TeddyCloud unter einem `lib://`-Pfad archiviert hat, bleiben im Regal **Tonies**, sofern ihre Audio-ID und SHA-1-Prüfsumme gemeinsam einem Eintrag des TeddyCloud-Katalogs entsprechen. Ein Dateiname, Titel oder eine einzelne Kennung genügt dafür nicht.
+
 Der Altersfilter in der Hörwelt ist ein Ansichtsfilter und ändert diese Freigaben nicht. Er lässt sich mit der Textsuche kombinieren und gilt für beide Regale. Ein Kindwechsel setzt ihn auf **Alle Altersstufen** zurück. Fehlende Alterswerte werden nicht als null Jahre behandelt.
 
 ## Bisheriges Format

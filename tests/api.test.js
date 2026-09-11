@@ -170,6 +170,34 @@ test('content kind requires a normalized model present in the separately loaded 
     assert.equal(h.requests.length, 2, 'Only the catalog and local age map are loaded; classification itself makes no requests');
 });
 
+test('verified catalog audio identity recognizes an original Tonie even when library model metadata is missing', async () => {
+    const hash = 'bf7de53ab340fc423e545d34c8e7939294193bec';
+    const systemHash = '6e663ca9d731140868c4dcb54f175c1fc696ca0a';
+    const h = harness(xhr => new URL(xhr.url, 'http://test').pathname === '/api/toniesJson' ? { body: [
+        { model: '11000430', category: 'audio-play', audio_id: ['1571647953'], hash: [hash] },
+        { model: 'box-de-de-01-00000000', category: 'system', audio_id: ['123'], hash: [systemHash] }
+    ] } : { status: 404, body: '' });
+    const loaded = await call(h.api, 'loadCatalog');
+    assert.equal(loaded.audioIdentityCount, 2);
+    assert.equal(h.api.contentKind({ model: '', audioId: 1571647953, sha1Hash: hash.toUpperCase() }), 'tonie');
+    assert.equal(h.api.contentKind({ model: '', audioId: 1571647953, sha1Hash: systemHash }), 'taf', 'Audio ID alone must not classify a file');
+    assert.equal(h.api.contentKind({ model: '', audioId: 124, sha1Hash: hash }), 'taf', 'Hash alone must not classify a file');
+    assert.equal(h.api.contentKind({ model: '', audioId: 123, sha1Hash: systemHash }), 'taf');
+    assert.equal(h.api.isSystemContent({ audioId: 123, sha1Hash: systemHash }), true);
+});
+
+test('conflicting catalog categories for one audio identity are excluded safely', async () => {
+    const hash = 'bf7de53ab340fc423e545d34c8e7939294193bec';
+    const h = harness(xhr => new URL(xhr.url, 'http://test').pathname === '/api/toniesJson' ? { body: [
+        { model: '11000430', category: 'audio-play', audio_id: 1571647953, hash },
+        { model: 'box-de-de-01-00000000', category: 'system', audio_id: [1571647953], hash: [hash] }
+    ] } : { status: 404, body: '' });
+    await call(h.api, 'loadCatalog');
+    const content = { audioId: 1571647953, sha1Hash: hash };
+    assert.equal(h.api.contentKind(content), 'taf');
+    assert.equal(h.api.isSystemContent(content), true);
+});
+
 test('same-host age map enriches physical figures and assigned content by their own exact models', async () => {
     const h = catalogHarness(() => ({ body: { tags: [makeTag({ hide: false })] } }), [{ model: 'dino' }], xhr => {
         assert.equal(xhr.method, 'GET');

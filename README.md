@@ -78,7 +78,7 @@ Danach die App neu laden. Änderungen im Elternbereich bleiben bis zum Import ei
 
 ## Verhalten und Grenzen
 
-Die Kategorie **Tonies** verwendet den Standard-Tonie-Katalog der eigenen TeddyCloud. Ein gesetztes Modell allein genügt nicht; das Modell muss im Katalog vorkommen. Systemtöne werden ausgeblendet. Das ist ein Metadatenabgleich, keine Echtheitsprüfung der Audiodatei.
+Die Kategorie **Tonies** verwendet den Standard-Tonie-Katalog der eigenen TeddyCloud. Ein gesetztes Modell allein genügt nicht; das Modell muss im Katalog vorkommen. Fehlt bei einem archivierten Original aus der Bibliothek die Modellangabe, wird es nur bei einer exakten Übereinstimmung von Audio-ID **und** SHA-1-Prüfsumme als Tonie erkannt. Systemtöne werden ausgeblendet.
 
 Ist im Kinderprofil eine Toniebox ausgewählt, lädt TonieHopper Figuren und Tonie-Geschichten ausschließlich aus dem zugehörigen TeddyCloud-Overlay. Das Auswahlfeld listet **Nicht zugeordnet** sowie alle von TeddyCloud gemeldeten Boxen. Ohne Zuordnung wird der Standard-Inhaltsbereich verwendet. Die gemeinsame **Eigene Hörwelt** aus der TAF-Bibliothek bleibt davon unberührt.
 

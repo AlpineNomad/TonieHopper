@@ -64,8 +64,9 @@ const seriesTags=seriesCases.map((item,i)=>{
 });
 function storyTitle(tag) {const info=tag.sourceInfo || tag.tonieInfo;return info.episode || info.title || info.series;}
 const unknownCatalogModel='custom-family-0001';
-let tags, overlayTagSets, boxList, libraryTags, config, postCount, failPost, catalogFailure;
-function reset() {tags=JSON.parse(JSON.stringify(originalTags));overlayTagSets=null;boxList=[];libraryTags=JSON.parse(JSON.stringify(originalTags));config=JSON.parse(JSON.stringify(goodConfig));postCount=0;failPost=false;catalogFailure='';}
+const catalogAudioHash='bf7de53ab340fc423e545d34c8e7939294193bec';
+let tags, overlayTagSets, boxList, libraryTags, catalogExtras, config, postCount, failPost, catalogFailure;
+function reset() {tags=JSON.parse(JSON.stringify(originalTags));overlayTagSets=null;boxList=[];libraryTags=JSON.parse(JSON.stringify(originalTags));catalogExtras=[];config=JSON.parse(JSON.stringify(goodConfig));postCount=0;failPost=false;catalogFailure='';}
 async function main() {
   const browser = await chromium.launch({executablePath:process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true,args:['--disable-webgl']});
   const errors=[];
@@ -88,7 +89,7 @@ async function main() {
           if(model && model!==unknownCatalogModel){models.set(model,Object.assign({},info,{model,category:model.indexOf('box-')===0 ? 'system' : 'tonie'}));}
         });
       });
-      return json(Array.from(models.values()));
+      return json(Array.from(models.values()).concat(catalogExtras));
     }
     if(p==='/api/getTagIndex') {
       const overlay=url.searchParams.get('overlay') || '';
@@ -101,7 +102,7 @@ async function main() {
     }
     if(p==='/api/fileIndexV2') {
       let dir=url.searchParams.get('path');
-      let files=dir==='/' ? [{name:'own.taf',isDir:false,tonieInfo:{},tafHeader:{valid:true,audioId:20,trackSeconds:[0,40]}},{name:'test',isDir:true}] : libraryTags.map((t,i)=>({name:t.source.split('/').pop(),isDir:false,tonieInfo:t.sourceInfo || t.tonieInfo,tafHeader:{valid:true,audioId:i+1,trackSeconds:[0,30]}}));
+      let files=dir==='/' ? [{name:'own.taf',isDir:false,tonieInfo:{},tafHeader:{valid:true,audioId:20,trackSeconds:[0,40]}},{name:'test',isDir:true}] : libraryTags.map((t,i)=>({name:t.source.split('/').pop(),isDir:false,tonieInfo:t.sourceInfo || t.tonieInfo,tafHeader:t.tafHeader || {valid:true,audioId:i+1,trackSeconds:[0,30]}}));
       return json({files});
     }
     if(p.startsWith('/content/json/set/')) {
@@ -211,6 +212,19 @@ async function main() {
     assert.equal(await figureChoice(defaultBoxTags[0].ruid).count(),1);
     await page.locator('[data-action="cancelEdit"]').click();
     assert.equal(postCount,0,'Switching box inventories is read-only');
+
+    reset();
+    const archivedOriginal=JSON.parse(JSON.stringify(originalTags[0]));
+    archivedOriginal.source='lib://test/1571647953.taf';
+    archivedOriginal.sourceInfo={model:'',series:'Dino Ranch',episode:'Archiviertes Original',picture:originalTags[0].sourceInfo.picture};
+    archivedOriginal.tafHeader={valid:true,audioId:1571647953,sha1Hash:catalogAudioHash,trackSeconds:[0,30]};
+    tags=[archivedOriginal];libraryTags=[JSON.parse(JSON.stringify(archivedOriginal))];
+    catalogExtras=[{model:'11000430',category:'audio-play',audio_id:['1571647953'],hash:[catalogAudioHash]}];
+    config={version:2,profiles:[{id:'archiv',name:'Archivkind',ruid:archivedOriginal.ruid,overlay:null}],library:{path:'/',hiddenSources:[],entries:[]}};
+    await open();await child('Archivkind').click();
+    assert.equal(await story(archivedOriginal.source).count(),1,'An archived original Tonie with missing library model remains in the Tonies shelf through its verified catalog audio identity');
+    await page.locator('[data-shelf="own"]').click();
+    assert.equal(await story(archivedOriginal.source).count(),0,'The verified original is not misplaced in Eigene Hörwelt');
 
     reset();await open();await child('Tim').click();
     const selectedSource=originalTags[2].source;
