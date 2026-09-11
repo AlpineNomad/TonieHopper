@@ -285,6 +285,26 @@
         });
     }
 
+    function listBoxes(callback) {
+        request('GET', withQuery('/api/getBoxes', {}), null, true, function (error, data) {
+            var seen = Object.create(null), boxes = [];
+            if (error) { callback(error); return; }
+            if (!data || !Array.isArray(data.boxes)) { callback(problem('INVALID_RESPONSE', 'TeddyCloud liefert keine Boxenliste.')); return; }
+            data.boxes.forEach(function (box) {
+                var id, key, name;
+                if (!box || typeof box.ID !== 'string') { return; }
+                id = normalizeOverlay(box.ID);
+                if (!id) { return; }
+                key = '$' + id.toLowerCase();
+                if (seen[key]) { return; }
+                seen[key] = true;
+                name = typeof box.boxName === 'string' ? box.boxName.replace(/[\x00-\x1f\x7f]/g, ' ').replace(/^\s+|\s+$/g, '').slice(0, 80) : '';
+                boxes.push({ id: id, name: name });
+            });
+            callback(null, boxes);
+        });
+    }
+
     function getTag(ruid, overlay, callback) {
         if (typeof overlay === 'function') { callback = overlay; overlay = null; }
         overlay = normalizeOverlay(overlay);
@@ -445,6 +465,7 @@
 
     root.TonieHopperAPI = {
         loadCatalog: loadCatalog,
+        listBoxes: listBoxes,
         listTags: listTags,
         listLibrary: listLibrary,
         scanLibrary: scanLibrary,

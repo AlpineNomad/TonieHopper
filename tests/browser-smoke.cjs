@@ -64,8 +64,8 @@ const seriesTags=seriesCases.map((item,i)=>{
 });
 function storyTitle(tag) {const info=tag.sourceInfo || tag.tonieInfo;return info.episode || info.title || info.series;}
 const unknownCatalogModel='custom-family-0001';
-let tags, libraryTags, config, postCount, failPost, catalogFailure;
-function reset() {tags=JSON.parse(JSON.stringify(originalTags));libraryTags=JSON.parse(JSON.stringify(originalTags));config=JSON.parse(JSON.stringify(goodConfig));postCount=0;failPost=false;catalogFailure='';}
+let tags, overlayTagSets, boxList, libraryTags, config, postCount, failPost, catalogFailure;
+function reset() {tags=JSON.parse(JSON.stringify(originalTags));overlayTagSets=null;boxList=[];libraryTags=JSON.parse(JSON.stringify(originalTags));config=JSON.parse(JSON.stringify(goodConfig));postCount=0;failPost=false;catalogFailure='';}
 async function main() {
   const browser = await chromium.launch({executablePath:process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true,args:['--disable-webgl']});
   const errors=[];
@@ -76,11 +76,13 @@ async function main() {
     const json=data=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(data)});
     if(url.host!=='toniehopper.test'){throw new Error('Unexpected external request: '+url);}
     if(p.endsWith('/config.json')) return json(config);
+    if(p==='/api/getBoxes') return json({boxes:boxList});
     if(p==='/api/toniesJson') {
       if(catalogFailure==='http') return route.fulfill({status:503,body:'Unavailable'});
       if(catalogFailure==='invalid') return json({unexpected:'not a catalog array'});
       const models=new Map();
-      libraryTags.concat(tags).forEach(tag=>{
+      const catalogTags=overlayTagSets ? Object.values(overlayTagSets).flat() : tags;
+      libraryTags.concat(catalogTags).forEach(tag=>{
         [tag.sourceInfo,tag.tonieInfo].forEach(info=>{
           const model=info && String(info.model || '').trim();
           if(model && model!==unknownCatalogModel){models.set(model,Object.assign({},info,{model,category:model.indexOf('box-')===0 ? 'system' : 'tonie'}));}
@@ -88,8 +90,15 @@ async function main() {
       });
       return json(Array.from(models.values()));
     }
-    if(p==='/api/getTagIndex') return json({tags});
-    if(p==='/api/getTagInfo') return json({tagInfo:tags.find(t=>t.ruid===url.searchParams.get('ruid'))});
+    if(p==='/api/getTagIndex') {
+      const overlay=url.searchParams.get('overlay') || '';
+      return json({tags:overlayTagSets ? (overlayTagSets[overlay] || []) : tags});
+    }
+    if(p==='/api/getTagInfo') {
+      const overlay=url.searchParams.get('overlay') || '';
+      const availableTags=overlayTagSets ? (overlayTagSets[overlay] || []) : tags;
+      return json({tagInfo:availableTags.find(t=>t.ruid===url.searchParams.get('ruid'))});
+    }
     if(p==='/api/fileIndexV2') {
       let dir=url.searchParams.get('path');
       let files=dir==='/' ? [{name:'own.taf',isDir:false,tonieInfo:{},tafHeader:{valid:true,audioId:20,trackSeconds:[0,40]}},{name:'test',isDir:true}] : libraryTags.map((t,i)=>({name:t.source.split('/').pop(),isDir:false,tonieInfo:t.sourceInfo || t.tonieInfo,tafHeader:{valid:true,audioId:i+1,trackSeconds:[0,30]}}));
@@ -98,7 +107,9 @@ async function main() {
     if(p.startsWith('/content/json/set/')) {
       postCount++;
       if(failPost) return route.fulfill({status:503,body:'Unavailable'});
-      const t=tags.find(t=>t.ruid===p.split('/').pop()), body=new URLSearchParams(route.request().postData());
+      const overlay=url.searchParams.get('overlay') || '';
+      const availableTags=overlayTagSets ? (overlayTagSets[overlay] || []) : tags;
+      const t=availableTags.find(t=>t.ruid===p.split('/').pop()), body=new URLSearchParams(route.request().postData());
       t.source=body.get('source');t.nocloud=body.get('nocloud')==='true';t.live=body.get('live')==='true';
       const selected=libraryTags.find(tag=>tag.source===t.source);
       if(selected){t.sourceInfo=JSON.parse(JSON.stringify(selected.sourceInfo || selected.tonieInfo));}
@@ -155,6 +166,51 @@ async function main() {
     const secondChildSources=await page.locator('.th-content').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('data-source')).sort());
     assert.deepEqual(secondChildSources,firstChildSources,'The same global exclusion applies to Alexandra');
     assert.equal(postCount,0);
+
+    reset();
+    const defaultBoxTags=JSON.parse(JSON.stringify(originalTags.slice(0,2)));
+    const nurseryTags=JSON.parse(JSON.stringify(originalTags.slice(2,4)));
+    const playroomTags=JSON.parse(JSON.stringify(originalTags.slice(4,6)));
+    const freshBoxTags=JSON.parse(JSON.stringify(originalTags.slice(6,7)));
+    overlayTagSets={'':defaultBoxTags,'VCU-4L-QNV':nurseryTags,'BOX-2':playroomTags,'FRESH-BOX':freshBoxTags};
+    boxList=[{ID:'BOX-2',boxName:'Spielzimmer'},{ID:'VCU-4L-QNV',boxName:'Kinderzimmer'},{ID:'FRESH-BOX',boxName:''}];
+    libraryTags=JSON.parse(JSON.stringify(originalTags));
+    config={version:2,profiles:[
+      {id:'standard',name:'Standardkind',ruid:defaultBoxTags[0].ruid,overlay:null},
+      {id:'nursery',name:'Boxkind',ruid:nurseryTags[0].ruid,overlay:'VCU-4L-QNV'},
+      {id:'playroom',name:'Spielkind',ruid:playroomTags[0].ruid,overlay:'BOX-2'}
+    ],library:{path:'/',hiddenSources:[],entries:[]}};
+    await open();
+    await child('Boxkind').click();
+    assert.deepEqual(await page.locator('.th-content').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('data-source')).sort()),nurseryTags.map(tag=>tag.source).sort(),'A child with a box ID sees only Tonies from that box overlay');
+    await page.locator('[data-action="home"]').first().click();await child('Spielkind').click();
+    assert.deepEqual(await page.locator('.th-content').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('data-source')).sort()),playroomTags.map(tag=>tag.source).sort(),'A different box ID selects its own Tonie inventory');
+    await page.locator('[data-action="home"]').first().click();await child('Standardkind').click();
+    assert.deepEqual(await page.locator('.th-content').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('data-source')).sort()),defaultBoxTags.map(tag=>tag.source).sort(),'A child without a box ID uses only the default content area');
+    await page.locator('[data-action="parents"]').first().click();
+    await page.getByRole('button',{name:'Bearbeiten',exact:true}).nth(0).click();
+    assert.deepEqual(await page.locator('#th-overlay option').evaluateAll(options=>options.map(option=>({value:option.value,text:option.textContent}))),[
+      {value:'',text:'Nicht zugeordnet'},
+      {value:'FRESH-BOX',text:'ID: FRESH-BOX'},
+      {value:'VCU-4L-QNV',text:'Kinderzimmer · VCU-4L-QNV'},
+      {value:'BOX-2',text:'Spielzimmer · BOX-2'}
+    ],'The profile editor lists the unassigned default followed by every TeddyCloud box');
+    assert.equal(await page.locator('#th-overlay').inputValue(),'VCU-4L-QNV','The stored box remains selected');
+    assert.equal(await page.locator('#th-figure-results .th-figure-choice').count(),2,'The profile editor initially shows only figures from the configured box');
+    assert.equal(await figureChoice(nurseryTags[0].ruid).count(),1);
+    assert.equal(await figureChoice(defaultBoxTags[0].ruid).count(),0);
+    await page.locator('#th-overlay').selectOption('FRESH-BOX');await page.waitForTimeout(500);
+    assert.equal(await page.locator('#th-figure-results .th-figure-choice').count(),1,'Selecting a previously unconfigured box loads its Tonies on demand');
+    assert.equal(await figureChoice(freshBoxTags[0].ruid).count(),1);
+    await page.locator('#th-overlay').selectOption('BOX-2');await page.waitForTimeout(500);
+    assert.equal(await page.locator('#th-figure-results .th-figure-choice').count(),2,'Changing the selected box switches the figure inventory');
+    assert.equal(await figureChoice(playroomTags[0].ruid).count(),1);
+    assert.equal(await figureChoice(nurseryTags[0].ruid).count(),0);
+    await page.locator('#th-overlay').selectOption('');await page.waitForTimeout(500);
+    assert.equal(await page.locator('#th-figure-results .th-figure-choice').count(),2,'Selecting Not assigned restores the default figure inventory');
+    assert.equal(await figureChoice(defaultBoxTags[0].ruid).count(),1);
+    await page.locator('[data-action="cancelEdit"]').click();
+    assert.equal(postCount,0,'Switching box inventories is read-only');
 
     reset();await open();await child('Tim').click();
     const selectedSource=originalTags[2].source;
@@ -324,8 +380,7 @@ async function main() {
     tags[2].sourceInfo={model:'',series:'Veralteter Tag',episode:'Veralteter Titel',picture:originalTags[0].tonieInfo.picture};
     await open();await child('Tim').click();
     assert.equal(tags.some(tag=>tag.source===aladdin.source),false,'Aladdin exists only in the library, with no matching physical tag');
-    assert.equal(await story(aladdin.source).count(),1,'A library-only file with an official catalog model belongs to Tonies');
-    assert.equal(await story(aladdin.source).locator('.th-content-title').textContent(),'Disney – Aladdin');
+    assert.equal(await story(aladdin.source).count(),0,'A library-only Tonie is not shown until it belongs to the child’s box content area');
     assert.equal(await story(originalTags[2].source).locator('.th-content-title').textContent(),expectedOriginalNames[originalTags[2].source],'Current library metadata takes precedence over stale title and empty model on a mapped physical tag');
     assert.equal(await story('lib://own.taf').count(),0,'An assigned own file must not inherit the model of Tim’s physical figure');
     assert.equal(await story(titledOwn.source).count(),0,'A title and cover do not make an empty content model a Tonie');
@@ -346,8 +401,7 @@ async function main() {
       {source:titledOwn.source,title:'Unser neues Baumhaus',series:'Familie',cover:originalTags[4].tonieInfo.picture,kind:'own'}
     ];
     await open();await child('Tim').click();
-    assert.equal(await story(aladdin.source).locator('.th-content-title').textContent(),'Lieblingsgeschichten – Die Wunderlampe','A configured title override is shown while the modeled story remains in Tonies');
-    assert.equal(await story(aladdin.source).locator('.th-cover img').getAttribute('src'),config.library.entries[0].cover);
+    assert.equal(await story(aladdin.source).count(),0,'Metadata cannot make a library-only Tonie belong to the child’s box');
     assert.equal(await story(titledOwn.source).count(),0,'Metadata overrides cannot promote an empty-model file into Tonies');
     await page.locator('[data-shelf="own"]').click();
     assert.equal(await story(aladdin.source).count(),0,'The legacy entry kind does not move a modeled Tonie into Eigene Hörwelt');
@@ -377,7 +431,7 @@ async function main() {
     assert.equal(await child('Alexandra').locator('.th-profile-name').evaluate(el=>el.scrollWidth<=el.clientWidth+2),true,'Long name fits');
     await page.screenshot({path:path.join(artifacts,'home-mobile.png'),fullPage:true});
     assert.deepEqual(errors,[]);
-    process.stdout.write('Browser integration passed: v2 setup/export, physical figure search including unavailable and duplicate-model Kreativ-Tonies, preserved profile input and exact identifier export, global exclusions, protected assignments, explicit display names without repeated series and German sorting, 19 scrollable stories, stable search input and middle-caret editing, official-catalog categories and library precedence, category-stable metadata overrides, technical box audio exclusion, catalog reload failures and recovery, 768px and 375px layout. All server responses mocked.\n');
+    process.stdout.write('Browser integration passed: v2 setup/export, box-specific and default Tonie inventories, physical figure search including unavailable and duplicate-model Kreativ-Tonies, preserved profile input and exact identifier export, global exclusions, protected assignments, explicit display names without repeated series and German sorting, 19 scrollable stories, stable search input and middle-caret editing, official-catalog categories and library precedence, category-stable metadata overrides, technical box audio exclusion, catalog reload failures and recovery, 768px and 375px layout. All server responses mocked.\n');
   } finally {await browser.close();}
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});

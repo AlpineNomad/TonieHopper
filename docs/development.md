@@ -76,4 +76,8 @@ Neue Revisionen ausdrücklich mit `--revision` und `--source-date` angeben; `--i
 python3 tools/build-plugin.py
 ```
 
+## Neue Version veröffentlichen
+
+Nach dem Push einer neuen Versionsnummer aus `plugin/toniehopper/plugin.json` lässt sich der GitHub-Workflow **Neue Plugin-Version** manuell starten. Er führt die Logiktests aus, baut und prüft `toniehopper.zip` und veröffentlicht anschließend den passenden Tag und GitHub-Release samt ZIP-Datei.
+
 Das Paket enthält nur den installierbaren Plugin-Ordner. Demo, Screenshots, Tests und Werkzeuge werden nicht mitinstalliert. Eine persönliche `plugin/toniehopper/config.json` oder Symlinks führen beim Paketbau zu einem Fehler. Die leere Konfigurationsvorlage bleibt unverändert; echte Daten gehören in `.local/` oder Dateien mit der Endung `.local.json`.

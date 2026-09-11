@@ -7,12 +7,14 @@ Die Vorlage `config/toniehopper.json` enthält keine Kinder und keine ausgeschlo
 | `version` | Formatversion, aktuell `2` |
 | `profiles` | Kinderprofile mit `id`, `name`, `ruid` und `overlay` |
 | `ruid` | Vollständige Kennung der tatsächlichen Zielfigur aus TeddyCloud |
-| `overlay` | Overlay der Figur oder `null` für die globale Zuordnung |
+| `overlay` | TeddyCloud-Box-Kennung für den Inhaltsbereich oder `null` für den Standardbereich |
 | `library.path` | Ausgangsordner der TAF-Bibliothek, standardmäßig `/` |
 | `library.hiddenSources` | Für alle Kinder ausgeblendete Quellen; leer bedeutet alle anzeigen |
 | `library.entries` | Zusätzliche Metadaten eigener Inhalte: `source`, `title`, `series`, `cover` |
 
 Echte Figuren immer über den Elternbereich auswählen. Ein Name oder Modell bezeichnet die Figur nicht eindeutig: Mehrere physische Figuren können dasselbe Modell haben. Die Suchliste zeigt deshalb ihre vollständigen Kennungen.
+
+Im Kinderprofil bietet TonieHopper zuerst **Nicht zugeordnet** und danach alle von TeddyCloud gemeldeten Boxen zur Auswahl an. Bei einer Box-Zuordnung lädt der Figurensucher nur die Figuren aus diesem TeddyCloud-Overlay. Nach Auswahl eines Kindes zeigt das Regal **Tonies** ebenfalls nur Geschichten, die im Inhaltsbereich dieser Box vorkommen. **Nicht zugeordnet** verwendet jeweils den Standardbereich.
 
 ## Entwurf und zentrale Datei
 
@@ -34,7 +36,7 @@ Die veröffentlichte Datei enthält Profil- und Bibliotheksdaten und ist für Ge
 
 ## Sichtbarkeit
 
-Alle neuen Geschichten sind zunächst für alle Kinder sichtbar. Im Reiter **Geschichten** bedeutet ein Haken **Für alle Kinder ausgeblendet**. Diese Auswahl gilt gemeinsam für sämtliche Kinder, einschließlich erkannter Kopien derselben Geschichte.
+Alle neuen Geschichten sind zunächst sichtbar, sofern sie zum Inhaltsbereich der jeweiligen Box gehören oder Teil der gemeinsamen eigenen Hörwelt sind. Im Reiter **Geschichten** bedeutet ein Haken **Für alle Kinder ausgeblendet**. Diese Auswahl gilt gemeinsam für sämtliche Kinder, einschließlich erkannter Kopien derselben Geschichte.
 
 Der Altersfilter in der Hörwelt ist ein Ansichtsfilter und ändert diese Freigaben nicht. Er lässt sich mit der Textsuche kombinieren und gilt für beide Regale. Ein Kindwechsel setzt ihn auf **Alle Altersstufen** zurück. Fehlende Alterswerte werden nicht als null Jahre behandelt.
 

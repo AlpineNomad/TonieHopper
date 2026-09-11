@@ -3,7 +3,7 @@
   var root = document.getElementById('toniehopper-demo'), screen = document.getElementById('th-screen');
   var api = window.TonieHopperAPI, configAPI = window.TonieHopperConfig, catalog = window.TonieHopperCatalog, figures = window.TonieHopperFigures;
   var profileForm = null;
-  var config = configAPI.empty(), draft = null, tags = [], contents = [], library = [], libraryExcludedSources = [], libraryError = '', loadToken = 0;
+  var config = configAPI.empty(), draft = null, boxes = [], boxesError = '', tags = [], tagsByOverlay = Object.create(null), boxContentSources = Object.create(null), contents = [], library = [], libraryExcludedSources = [], libraryError = '', loadToken = 0, profileTagLoadToken = 0;
   var state = {page:'loading', child:0, selected:null, shelf:'tonies', maxAge:'', phase:0, tab:'profiles', edit:-1, query:'', busy:false, uncertain:false, error:'', loaded:false, dirty:false, preview:false};
   var collator=null;
   try { if(window.Intl && window.Intl.Collator){collator=new window.Intl.Collator('de',{sensitivity:'base',numeric:true});} } catch(ignore) {}
@@ -50,28 +50,64 @@
   function contentHidden(c,cfg) { return catalog.sources(c).some(function(source){return cfg.library.hiddenSources.indexOf(source)>=0;}); }
   function contentAllowed(c,cfg,p) { var sources=catalog.sources(c);return sources.length>0 && sources.every(function(source){return configAPI.allowed(cfg,p,source);}); }
   function contentKey(c) { return c.source+(c.source.indexOf('content://')===0 ? ':'+(c.overlay||'') : ''); }
+  function overlayName(value) { return String(value == null ? '' : value).replace(/^\s+|\s+$/g,''); }
+  function overlayKey(value) { return '$'+overlayName(value); }
+  function validOverlay(value) { value=overlayName(value);return value==='' || /^[a-z0-9_-]{1,15}$/i.test(value); }
+  function boxOptions() {
+    var selected=overlayName(profileForm && profileForm.overlay),available=false,html='<option value=""'+(selected==='' ? ' selected' : '')+'>Nicht zugeordnet</option>',list=boxes.slice();
+    list.forEach(function(box){if(box.id.toLowerCase()===selected.toLowerCase()){available=true;}});
+    if(selected && !available){list.push({id:selected,name:'',missing:true});}
+    ordered(list,function(box){return box.name || box.id;}).forEach(function(row){var box=row.value,label=box.name ? box.name+' · '+box.id : 'ID: '+box.id;if(box.missing){label+=' (nicht mehr gefunden)';}html+='<option value="'+esc(box.id)+'"'+(box.id.toLowerCase()===selected.toLowerCase() ? ' selected' : '')+'>'+esc(label)+'</option>';});
+    return html;
+  }
+  function rebuildTags() {
+    var key;tags=[];
+    for(key in tagsByOverlay){if(Object.prototype.hasOwnProperty.call(tagsByOverlay,key)){tags=tags.concat(tagsByOverlay[key]);}}
+  }
+  function setOverlayTags(overlay,list) { tagsByOverlay[overlayKey(overlay)]=list;rebuildTags(); }
+  function figurePool() { return profileForm ? (tagsByOverlay[overlayKey(profileForm.overlay)] || []) : []; }
   function announce(s) { document.getElementById('th-announcer').textContent = s; }
   function cover(url) { return typeof url === 'string' && /^\/(?!\/)/.test(url) && !/[\\\x00-\x1f]/.test(url) ? url : ''; }
   function profileTag(p) { for (var i=0;i<tags.length;i++) { if (tags[i].ruid.toLowerCase() === p.ruid.toLowerCase() && (tags[i].overlay || null) === (p.overlay || null)) { return tags[i]; } } return null; }
   function assignedContent(tag) { var c=tag && tag.content;if(c && c.source){for(var i=0;i<contents.length;i++){if(catalog.sources(contents[i]).indexOf(c.source)>=0 && (c.source.indexOf('content://')!==0 || (contents[i].overlay||null)===(c.overlay||null))){return contents[i];}}}return c; }
   function figure(p, cls) { var t = profileTag(p), url = t && cover(t.figure.cover); return url ? '<img class="'+(cls || '')+'" src="'+esc(url)+'" alt="">' : '<span class="th-figure-placeholder" aria-hidden="true">'+icon('shapes')+'</span>'; }
   function figureKey(t) { return figures.getTagKey(t); }
-  function selectedFigure() { if(!profileForm){return null;}for(var i=0;i<tags.length;i++){if(figureKey(tags[i])===profileForm.selectedKey){return tags[i];}}return null; }
+  function selectedFigure() { var pool=figurePool();if(!profileForm){return null;}for(var i=0;i<pool.length;i++){if(figureKey(pool[i])===profileForm.selectedKey){return pool[i];}}return null; }
   function figureThumbnail(t) { var url=cover(t.figure.cover);return '<span class="th-picker-image">'+(url ? '<img src="'+esc(url)+'" alt="">' : icon('shapes'))+'</span>'; }
   function figureSelection() { var t=selectedFigure();return t ? '<span class="th-picker-check" aria-hidden="true">'+icon('check')+'</span><span>Ausgewählt: <strong>'+esc(contentName(t.figure))+'</strong><small>'+esc(t.ruid)+'</small></span>' : '<span>Noch keine Figur ausgewählt. Tippe auf einen Treffer.</span>'; }
   function figureResults(list) {
     var html='';
     list.forEach(function(row){var t=row.tag,selected=figureKey(t)===profileForm.selectedKey;html+=button('pickFigure',figureThumbnail(t)+'<span class="th-picker-name"><strong>'+esc(contentName(t.figure))+'</strong><small>'+esc(t.ruid)+(t.overlay ? ' · Box '+esc(t.overlay) : '')+'</small></span>'+(selected ? '<span class="th-picker-check" aria-hidden="true">'+icon('check')+'</span>' : ''),'th-figure-choice'+(selected ? ' th-figure-chosen' : ''),'id="th-figure-choice-'+row.index+'" data-index="'+row.index+'" aria-pressed="'+selected+'"');});
-    return html || '<p class="th-picker-empty">Keine Figur gefunden. Versuche einen anderen Namen oder eine Kennung.</p>';
+    if(html){return html;}
+    if(profileForm && profileForm.overlayLoading){return '<p class="th-picker-empty">Die Tonies dieser Box werden geladen …</p>';}
+    if(profileForm && profileForm.overlayError){return '<p class="th-picker-empty">'+esc(profileForm.overlayError)+'</p>';}
+    return '<p class="th-picker-empty">Keine Figur gefunden. Versuche einen anderen Namen oder eine Kennung.</p>';
   }
   function updateFigureResults() {
     var list=document.getElementById('th-figure-results');if(!list || !profileForm){return;}
-    var matches=figures.search(tags,profileForm.query),count=matches.length;
+    var matches=figures.search(figurePool(),profileForm.query),count=matches.length;
     list.innerHTML=figureResults(matches);
     document.getElementById('th-figure-count').textContent=count+(count===1 ? ' Figur' : ' Figuren');
     document.getElementById('th-figure-selection').innerHTML=figureSelection();
   }
-  function beginProfileEdit(index) { var p=draft.profiles[index] || {name:'',ruid:'',overlay:null};profileForm={name:p.name,overlay:p.overlay||'',overlayTouched:!!p.overlay,selectedKey:p.ruid ? figureKey(p) : '',query:''};state.edit=index;state.error='';render(); }
+  function loadProfileOverlay() {
+    var overlay,token,key;
+    if(!profileForm){return;}
+    overlay=overlayName(profileForm.overlay);token=++profileTagLoadToken;key=overlayKey(overlay);
+    profileForm.overlayError='';
+    if(!validOverlay(overlay)){profileForm.overlayLoading=false;profileForm.overlayError='Die Box-Kennung darf höchstens 15 Buchstaben, Zahlen, Bindestriche oder Unterstriche enthalten.';updateFigureResults();return;}
+    if(Object.prototype.hasOwnProperty.call(tagsByOverlay,key)){profileForm.overlayLoading=false;updateFigureResults();return;}
+    profileForm.overlayLoading=true;updateFigureResults();
+    api.listTags(function(error,result){
+      if(!profileForm || token!==profileTagLoadToken || overlayName(profileForm.overlay)!==overlay){return;}
+      profileForm.overlayLoading=false;
+      if(error){profileForm.overlayError='Die Tonies dieser Box konnten nicht geladen werden: '+error.message;updateFigureResults();return;}
+      setOverlayTags(overlay,result);rebuildContents();updateFigureResults();
+    },overlay);
+  }
+  function closeProfileEdit() { profileTagLoadToken++;profileForm=null;state.edit=-1; }
+  function changeProfileOverlay(value) { var previous;if(!profileForm){return;}previous=overlayName(profileForm.overlay);profileForm.overlay=value;profileForm.overlayError='';if(previous!==overlayName(value)){profileForm.selectedKey='';}profileForm.overlayLoading=validOverlay(value) && !Object.prototype.hasOwnProperty.call(tagsByOverlay,overlayKey(value));updateFigureResults();loadProfileOverlay(); }
+  function beginProfileEdit(index) { var p=draft.profiles[index] || {name:'',ruid:'',overlay:null};closeProfileEdit();profileForm={name:p.name,overlay:p.overlay||'',selectedKey:p.ruid ? figureKey(p) : '',query:'',overlayLoading:false,overlayError:''};state.edit=index;state.error='';render();loadProfileOverlay(); }
   function art(c) { var url = cover(c.cover); return url ? '<img src="'+esc(url)+'" alt="">' : '<div class="th-library-example">'+icon('book')+'<span class="th-example-label">Hörgeschichte</span></div>'; }
   function child() { return config.profiles[state.child]; }
   function button(action, label, cls, extra) { return '<button type="button" class="'+(cls || 'th-secondary')+'" data-action="'+action+'" '+(extra || '')+'>'+label+'</button>'; }
@@ -80,17 +116,27 @@
   function empty(title, text, action, label) { return '<div class="th-empty th-center">'+icon('book')+'<h2>'+esc(title)+'</h2><p>'+esc(text)+'</p>'+(action ? '<div class="th-actions">'+button(action,esc(label),'th-primary')+'</div>' : '')+'</div>'; }
   function rebuildContents() {
     var seen = {}, all = [];
+    boxContentSources=Object.create(null);
     libraryExcludedSources.forEach(function (source) { seen[source] = true; });
     // A library source describes the audio file itself, independently of the
     // figure it is currently assigned to. Prefer these metadata when available.
     library.forEach(function (c) { if (c.available && c.source && !seen[contentKey(c)]) { seen[contentKey(c)] = true; all.push(clone(c)); } });
-    tags.forEach(function (tag) { if (tag.content && tag.content.available && tag.content.source && !seen[contentKey(tag.content)]) { seen[contentKey(tag.content)] = true; all.push(clone(tag.content)); } });
+    tags.forEach(function (tag) {
+      var key=overlayKey(tag.overlay),available=tag.content && tag.content.available && tag.content.source;
+      if(!boxContentSources[key]){boxContentSources[key]=Object.create(null);}
+      if(available){catalog.sources(tag.content).forEach(function(source){boxContentSources[key][source]=true;});}
+      if(available && !seen[contentKey(tag.content)]) { seen[contentKey(tag.content)] = true; all.push(clone(tag.content)); }
+    });
     all.forEach(function (c) { c.kind=api.contentKind(c); });
     contents = catalog.groupContents(all).map(function(c){return contentMetadata(c,config);}).sort(compareContent);
   }
+  function contentInProfileBox(c,p) {
+    var available=boxContentSources[overlayKey(p && p.overlay)] || Object.create(null);
+    return catalog.sources(c).some(function(source){return available[source]===true;});
+  }
   function items() {
     var p=child(), query=searchText(state.query);
-    return contents.filter(function (c) { return p && contentAllowed(c,config,p) && (c.source.indexOf('content://')!==0 || (c.overlay||null)===(p.overlay||null)) && (state.shelf==='own' ? c.kind==='taf' : c.kind!=='taf') && catalog.matchesMaxAge(c,state.maxAge) && searchText(contentName(c)).indexOf(query)>=0; });
+    return contents.filter(function (c) { return p && contentAllowed(c,config,p) && (c.source.indexOf('content://')!==0 || (c.overlay||null)===(p.overlay||null)) && (state.shelf==='own' ? c.kind==='taf' : c.kind!=='taf' && contentInProfileBox(c,p)) && catalog.matchesMaxAge(c,state.maxAge) && searchText(contentName(c)).indexOf(query)>=0; });
   }
   function home() {
     if (!config.profiles.length) { return empty('Hier beginnt eure Hörwelt.', 'Lege zuerst ein Kind an und wähle seine feste Tonie-Figur aus.', 'parents', 'Jetzt einrichten'); }
@@ -134,8 +180,8 @@
     if (state.dirty) { html+='<p class="th-draft-note">Änderungen vorbereitet. Exportiere die Konfiguration, um sie zentral zu übernehmen.</p>'; }
     if (state.tab==='profiles') {
       if (state.edit>=0) {
-        var figureMatches=figures.search(tags,profileForm.query);
-        html+='<div class="th-form th-profile-form"><div><label class="th-label" for="th-name">Name des Kindes</label><input id="th-name" class="th-input" maxlength="40" placeholder="Zum Beispiel Mia" value="'+esc(profileForm.name)+'"></div><div><label class="th-label" for="th-overlay">Box-Kennung / Overlay (optional)</label><input id="th-overlay" class="th-input" maxlength="64" value="'+esc(profileForm.overlay)+'" placeholder="Leer = allgemeine Zuordnung"></div><div class="th-figure-picker"><label class="th-label" for="th-figure">Feste Tonie-Figur</label><input type="search" id="th-figure" class="th-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Name oder Kennung suchen …" value="'+esc(profileForm.query)+'" aria-describedby="th-figure-hint"><p id="th-figure-hint" class="th-picker-hint">Suche in allen Figuren, auch Kreativ-Tonies.</p><div id="th-figure-selection" class="th-figure-selection" role="status">'+figureSelection()+'</div><p id="th-figure-count" class="th-figure-count" role="status" aria-live="polite">'+figureMatches.length+' Figuren</p><div id="th-figure-results" class="th-figure-results" role="group" aria-label="Gefundene Figuren">'+figureResults(figureMatches)+'</div></div></div><div class="th-actions">'+button('saveProfile','Im Entwurf übernehmen','th-primary')+button('cancelEdit','Abbrechen','th-quiet')+'</div>';
+        var figureMatches=figures.search(figurePool(),profileForm.query),activeOverlay=overlayName(profileForm.overlay);
+        html+='<div class="th-form th-profile-form"><div><label class="th-label" for="th-name">Name des Kindes</label><input id="th-name" class="th-input" maxlength="40" placeholder="Zum Beispiel Mia" value="'+esc(profileForm.name)+'"></div><div><label class="th-label" for="th-overlay">Toniebox</label><select id="th-overlay" class="th-input">'+boxOptions()+'</select>'+(boxesError ? '<p class="th-picker-hint">Die Boxenliste konnte nicht geladen werden. Bereits gespeicherte Zuordnungen bleiben erhalten.</p>' : '')+'</div><div class="th-figure-picker"><label class="th-label" for="th-figure">Feste Tonie-Figur</label><input type="search" id="th-figure" class="th-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Name oder Kennung suchen …" value="'+esc(profileForm.query)+'" aria-describedby="th-figure-hint"><p id="th-figure-hint" class="th-picker-hint">'+(activeOverlay ? 'Es werden nur Figuren der Box '+esc(activeOverlay)+' angezeigt.' : 'Ohne Box-Zuordnung werden nur Figuren aus dem Standardbereich angezeigt.')+'</p><div id="th-figure-selection" class="th-figure-selection" role="status">'+figureSelection()+'</div><p id="th-figure-count" class="th-figure-count" role="status" aria-live="polite">'+figureMatches.length+' Figuren</p><div id="th-figure-results" class="th-figure-results" role="group" aria-label="Gefundene Figuren">'+figureResults(figureMatches)+'</div></div></div><div class="th-actions">'+button('saveProfile','Im Entwurf übernehmen','th-primary')+button('cancelEdit','Abbrechen','th-quiet')+'</div>';
       } else {
         if (!draft.profiles.length) { html+=empty('Wer hört mit?', 'Wähle die Figur aus, die dauerhaft zu deinem Kind gehört.'); }
         ordered(draft.profiles,function(p){return p.name;}).forEach(function (row) { var p=row.value,i=row.index,t=profileTag(p); html+='<div class="th-parent-row">'+figure(p)+'<div class="th-grow"><strong>'+esc(p.name)+'</strong><p>'+esc(t ? contentName(t.figure) : p.ruid)+'</p></div>'+button('editProfile','Bearbeiten','th-secondary','data-index="'+i+'"')+button('deleteProfile','Entfernen','th-quiet','data-index="'+i+'"')+'</div>'; });
@@ -143,7 +189,7 @@
       }
     }
     if (state.tab==='library') {
-      html+='<p class="th-admin-note">Alle verfügbaren Geschichten sind für alle Kinder sichtbar – auch neue Geschichten. Setze ein Häkchen bei den Geschichten, die du für alle Kinder ausblenden möchtest.</p>'+errorBox(libraryError)+'<div class="th-actions">'+button('reloadLibrary',icon('reload')+'Bibliothek neu einlesen','th-secondary')+'</div><div class="th-approval-list">';
+      html+='<p class="th-admin-note">Im Regal Tonies sieht jedes Kind nur Geschichten aus seiner Box beziehungsweise dem Standardbereich. Hier kannst du Geschichten zusätzlich für alle Kinder ausblenden; neue Geschichten sind zunächst sichtbar.</p>'+errorBox(libraryError)+'<div class="th-actions">'+button('reloadLibrary',icon('reload')+'Bibliothek neu einlesen','th-secondary')+'</div><div class="th-approval-list">';
       ordered(contents,function(c){return contentName(draftContent(c));}).forEach(function (row) { var i=row.index,c=draftContent(row.value),checked=contentHidden(c,draft); html+='<div class="th-approval-row'+(checked ? ' th-is-hidden' : '')+'"><label><input type="checkbox" data-hide="'+i+'" aria-label="Für alle Kinder ausblenden: '+esc(contentName(c))+'" '+(checked ? 'checked' : '')+'>'+art(c)+'<span class="th-story-info"><strong>'+esc(contentName(c))+'</strong>'+(c.kind==='taf' ? '<small>Eigene TAF-Bibliothek</small>' : '')+'</span><span class="th-visibility-label">'+(checked ? 'Ausgeblendet' : 'Sichtbar')+'</span></label>'+(c.kind==='taf' ? button('editContent','Titel & Cover','th-quiet','data-index="'+i+'"') : '')+'</div>'; });
       html+='</div>';
       if (!contents.length) { html+=empty('Keine Geschichten gefunden.', 'Prüfe deine TeddyCloud-Bibliothek und lade sie erneut.'); }
@@ -178,30 +224,41 @@
       if (callback) { callback(error); }
     });
   }
+  function loadConfiguredTags(callback) {
+    var overlays=[''],seen={'$':true},pending;
+    config.profiles.forEach(function(p){var overlay=overlayName(p.overlay),key=overlayKey(overlay);if(!seen[key]){seen[key]=true;overlays.push(overlay);}});
+    tagsByOverlay=Object.create(null);tags=[];pending=overlays.slice();
+    function next() {
+      var overlay;
+      if(!pending.length){callback(null);return;}
+      overlay=pending.shift();
+      api.listTags(function(error,result){
+        if(error){error.message=(overlay ? 'Box '+overlay+': ' : 'Standardbereich: ')+error.message;callback(error);return;}
+        setOverlayTags(overlay,result);next();
+      },overlay);
+    }
+    next();
+  }
   function load() {
     var token=++loadToken;
+    closeProfileEdit();
     state.page='loading'; state.loaded=false; state.uncertain=false; state.error=''; render();
     configAPI.load(function (error,c) {
       if(token!==loadToken){return;}
       if (error) { state.page='error';state.error=error.message;render();return; }
       config=c; draft=clone(config); library=[];libraryExcludedSources=[];libraryError='';state.dirty=false;
-      api.loadCatalog(function (error) {
+      boxes=[];boxesError='';
+      api.listBoxes(function(boxError,result){
         if(token!==loadToken){return;}
-        if (error) { state.page='error';state.error='Der Tonie-Katalog konnte nicht geladen werden. '+error.message;render();return; }
-        api.listTags(function (error,result) {
+        if(boxError){boxesError=boxError.message;}else{boxes=result;}
+        api.loadCatalog(function (error) {
           if(token!==loadToken){return;}
-          if (error) { state.page='error';state.error=error.message;render();return; }
-          tags=result;
-          var pending=config.profiles.filter(function(p){return !!p.overlay;});
-          function next() {
+          if (error) { state.page='error';state.error='Der Tonie-Katalog konnte nicht geladen werden. '+error.message;render();return; }
+          loadConfiguredTags(function (error) {
             if(token!==loadToken){return;}
-            if (!pending.length) {
-              loadLibrary(function(error){if(error){state.page='error';state.error=libraryError;}else{state.child=0;state.page='home';state.loaded=true;}render();});
-              return;
-            }
-            var p=pending.shift();api.getTag(p.ruid,p.overlay,function(err,tag){if(token!==loadToken){return;}if(!err){tags.push(tag);}next();});
-          }
-          next();
+            if (error) { state.page='error';state.error=error.message;render();return; }
+            loadLibrary(function(error){if(error){state.page='error';state.error=libraryError;}else{state.child=0;state.page='home';state.loaded=true;}render();});
+          });
         });
       });
     });
@@ -231,7 +288,8 @@
       api.assign(current,c,function(error,result) {
         state.busy=false;
         if(error) {state.uncertain=!!error.savedMayHaveChanged;state.error=state.uncertain ? 'Die Zuordnung wurde gesendet, aber noch nicht bestätigt. Bitte lade den aktuellen Stand neu, bevor du noch einmal speicherst.' : error.message;render();return;}
-        var found=false;tags=tags.map(function(t){if(t.ruid===result.tag.ruid && (t.overlay||null)===(result.tag.overlay||null)){found=true;return result.tag;}return t;});if(!found){tags.push(result.tag);}
+        var key=overlayKey(result.tag.overlay),overlayTags=tagsByOverlay[key] || [],found=false;
+        overlayTags=overlayTags.map(function(t){if(t.ruid===result.tag.ruid){found=true;return result.tag;}return t;});if(!found){overlayTags.push(result.tag);}setOverlayTags(result.tag.overlay,overlayTags);
         rebuildContents();state.phase=0;state.preview=false;state.page='refresh';announce('Gespeichert. Jetzt machst du deine Box bereit.');render(true);
       });
     });
@@ -241,8 +299,8 @@
     if (a==='home') { changePage('home');return; }
     if (a==='reload') { if(state.dirty && !window.confirm('Vorbereitete Änderungen verwerfen und den zentralen Stand neu laden?')){return;}load();return; }
     if (!state.loaded) {return;}
-    if (a==='parents') {state.edit=-1;changePage('parents');return;}
-    if (a==='tab') {state.tab=b.getAttribute('data-tab');state.edit=-1;state.error='';render();return;}
+    if (a==='parents') {closeProfileEdit();changePage('parents');return;}
+    if (a==='tab') {state.tab=b.getAttribute('data-tab');closeProfileEdit();state.error='';render();return;}
     if (a==='child') {state.child=i;state.shelf='tonies';state.query='';state.maxAge='';changePage('library');return;}
     if (a==='library') {changePage('library');return;}
     if (a==='shelf') {state.shelf=b.getAttribute('data-shelf');state.query='';changePage('library');return;}
@@ -252,8 +310,8 @@
     if (a==='phase') {state.phase=i;render();return;}
     if (a==='next') {if(state.phase<3){state.phase++;render(true);}else{changePage(state.preview?'home':'done');}return;}
     if (a==='editProfile') {beginProfileEdit(i);return;}
-    if (a==='pickFigure') {var chosen=tags[i];if(!profileForm || !chosen){return;}profileForm.selectedKey=figureKey(chosen);if(!profileForm.overlayTouched){profileForm.overlay=chosen.overlay||'';document.getElementById('th-overlay').value=profileForm.overlay;}updateFigureResults();var selectedButton=document.getElementById('th-figure-choice-'+i);if(selectedButton){selectedButton.focus();}return;}
-    if (a==='cancelEdit') {state.edit=-1;state.error='';render();return;}
+    if (a==='pickFigure') {var chosen=figurePool()[i];if(!profileForm || !chosen){return;}profileForm.selectedKey=figureKey(chosen);updateFigureResults();var selectedButton=document.getElementById('th-figure-choice-'+i);if(selectedButton){selectedButton.focus();}return;}
+    if (a==='cancelEdit') {closeProfileEdit();state.error='';render();return;}
     if (a==='deleteProfile') {if(window.confirm('Das Profil von '+draft.profiles[i].name+' entfernen? Die Figur und ihre Inhalte bleiben erhalten.')){draft.profiles.splice(i,1);state.dirty=true;render();}return;}
     if (a==='saveProfile') {
       profileForm.name=document.getElementById('th-name').value;profileForm.overlay=document.getElementById('th-overlay').value;
@@ -261,7 +319,7 @@
       if(!tag){state.error='Bitte tippe eine feste Figur in den Suchergebnissen an.';render();return;}
       var updated=clone(draft), existing=updated.profiles[state.edit];
       updated.profiles[state.edit]={id:existing ? existing.id : 'kind-'+new Date().getTime(),name:name,ruid:tag.ruid,overlay:overlay || null};
-      try {draft=configAPI.validate(updated);state.dirty=true;state.edit=-1;state.error='';}catch(error){state.error=error.message;}render();return;
+      try {draft=configAPI.validate(updated);state.dirty=true;closeProfileEdit();state.error='';}catch(error){state.error=error.message;}render();return;
     }
     if (a==='reloadLibrary') {state.busy=true;render();loadLibrary(function(){state.busy=false;render();});return;}
     if (a==='editContent') {
@@ -275,11 +333,12 @@
   root.addEventListener('change',function(event) {
     var el=event.target, index=el.getAttribute('data-hide');
     if(el.id==='th-max-age'){state.maxAge=el.value;updateLibraryResults();return;}
+    if(el.id==='th-overlay'){changeProfileOverlay(el.value);return;}
     if(index!==null){catalog.sources(contents[Number(index)]).forEach(function(source){var pos=draft.library.hiddenSources.indexOf(source);if(el.checked && pos<0){draft.library.hiddenSources.push(source);}else if(!el.checked && pos>=0){draft.library.hiddenSources.splice(pos,1);}});state.dirty=true;render();}
     if(el.id==='th-import' && el.files && el.files[0]){if(el.files[0].size>1000000){state.error='Die Konfigurationsdatei ist zu groß.';render();return;}var reader=new FileReader();reader.onload=function(){try{draft=configAPI.validate(JSON.parse(reader.result));state.dirty=true;state.error='';}catch(error){state.error='Import fehlgeschlagen: '+error.message;}render();};reader.onerror=function(){state.error='Die Datei konnte nicht gelesen werden.';render();};reader.readAsText(el.files[0]);}
   });
   var searchTimer=null;
-  root.addEventListener('input',function(event){var el=event.target;if(el.id==='th-search'){state.query=el.value;clearTimeout(searchTimer);searchTimer=setTimeout(updateLibraryResults,200);}if(profileForm){if(el.id==='th-name'){profileForm.name=el.value;}if(el.id==='th-overlay'){profileForm.overlay=el.value;profileForm.overlayTouched=true;}if(el.id==='th-figure'){profileForm.query=el.value;updateFigureResults();}}});
+  root.addEventListener('input',function(event){var el=event.target;if(el.id==='th-search'){state.query=el.value;clearTimeout(searchTimer);searchTimer=setTimeout(updateLibraryResults,200);}if(profileForm){if(el.id==='th-name'){profileForm.name=el.value;}if(el.id==='th-figure'){profileForm.query=el.value;updateFigureResults();}}});
   root.addEventListener('error',function(event){if(event.target.tagName==='IMG'){var img=event.target;img.style.display='none';if(img.parentNode.className.indexOf('th-figure-field')>=0){var fallback=document.createElement('span');fallback.className='th-figure-placeholder';fallback.innerHTML=icon('shapes');img.parentNode.appendChild(fallback);}}},true);
   window.addEventListener('resize',fitNames);
   window.addEventListener('load',function(){fitNames();setTimeout(fitNames,500);setTimeout(fitNames,1800);});

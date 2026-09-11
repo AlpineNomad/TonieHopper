@@ -66,6 +66,32 @@ test('loading adapter does not request or write anything', () => {
     assert.equal(h.requests.length, 0);
 });
 
+test('box list returns each valid TeddyCloud box once with its optional name', async () => {
+    const h = harness(xhr => {
+        assert.equal(xhr.method, 'GET');
+        assert.equal(new URL(xhr.url, 'http://test').pathname, '/api/getBoxes');
+        return { body: { boxes: [
+            { ID: 'VCU-4L-QNV', boxName: 'Kinderzimmer' },
+            { ID: 'BOX-2', boxName: '  Spielzimmer  ' },
+            { ID: 'vcu-4l-qnv', boxName: 'Duplikat' },
+            { ID: '', boxName: 'Standard' }, { ID: '../bad' }, { ID: 123 }, null
+        ] } };
+    });
+    const boxes = await call(h.api, 'listBoxes');
+    assert.deepEqual(Array.from(boxes, box => ({ id: box.id, name: box.name })), [
+        { id: 'VCU-4L-QNV', name: 'Kinderzimmer' },
+        { id: 'BOX-2', name: 'Spielzimmer' }
+    ]);
+    assert.equal(h.requests.length, 1);
+});
+
+test('box list rejects malformed TeddyCloud responses', async () => {
+    for (const body of [null, [], {}, { boxes: null }]) {
+        const h = harness(() => ({ body }));
+        await assert.rejects(call(h.api, 'listBoxes'), error => error.code === 'INVALID_RESPONSE');
+    }
+});
+
 test('content identity normalizes positive uint32 audio IDs and header hash case without requests or input mutation', () => {
     const h = harness(() => { throw new Error('unexpected request'); });
     const hash = 'bf7de53ab340fc423e545d34c8e7939294193bec';

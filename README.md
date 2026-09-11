@@ -16,7 +16,7 @@ Alle Screenshots stammen aus der mitgelieferten Offline-Demo. Namen, Profile und
 
 ## Funktionen
 
-- Mehrere Kinder mit jeweils einer fest zugeordneten physischen Tonie-Figur.
+- Mehrere Kinder mit jeweils einer fest zugeordneten physischen Tonie-Figur und optionaler Toniebox-Auswahl direkt aus TeddyCloud.
 - Alphabetische Geschichtenliste, Textsuche und Scrollen ohne Seitenwechsel.
 - Tonies und eine eigene Hörwelt für weitere TAF-Inhalte.
 - Altersempfehlung im Kreis. **Alter bis → 4 Jahre** zeigt alle bekannten Empfehlungen bis einschließlich vier. Fehlende Angaben erscheinen als **?** und bleiben unter **Alle Altersstufen** sichtbar.
@@ -79,6 +79,8 @@ Danach die App neu laden. Änderungen im Elternbereich bleiben bis zum Import ei
 ## Verhalten und Grenzen
 
 Die Kategorie **Tonies** verwendet den Standard-Tonie-Katalog der eigenen TeddyCloud. Ein gesetztes Modell allein genügt nicht; das Modell muss im Katalog vorkommen. Systemtöne werden ausgeblendet. Das ist ein Metadatenabgleich, keine Echtheitsprüfung der Audiodatei.
+
+Ist im Kinderprofil eine Toniebox ausgewählt, lädt TonieHopper Figuren und Tonie-Geschichten ausschließlich aus dem zugehörigen TeddyCloud-Overlay. Das Auswahlfeld listet **Nicht zugeordnet** sowie alle von TeddyCloud gemeldeten Boxen. Ohne Zuordnung wird der Standard-Inhaltsbereich verwendet. Die gemeinsame **Eigene Hörwelt** aus der TAF-Bibliothek bleibt davon unberührt.
 
 Kopien werden nur anhand derselben gültigen Audio-ID **und** SHA-1-Prüfsumme aus dem TAF-Header zusammengeführt. Gleiche Titel, Modelle oder Bilder reichen nicht aus. Verschiedene Geschichten eines Sets bleiben dadurch getrennt. Die Quelldateien werden nicht verändert oder gelöscht.
 

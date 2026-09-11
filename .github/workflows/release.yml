@@ -1,0 +1,61 @@
+name: Neue Plugin-Version
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: toniehopper-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Plugin testen und veröffentlichen
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+
+      - name: Version bestimmen
+        id: version
+        shell: bash
+        run: |
+          version="$(python3 -c 'import json; print(json.load(open("plugin/toniehopper/plugin.json", encoding="utf-8"))["version"])')"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Ungültige Plugin-Version: $version" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Logiktests ausführen
+        run: node --test tests/*.test.js
+
+      - name: Plugin-Paket bauen
+        run: python3 tools/build-plugin.py --output dist/toniehopper.zip
+
+      - name: Plugin-Paket prüfen
+        run: unzip -t dist/toniehopper.zip
+
+      - name: Vorhandene Version ausschließen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "Release $RELEASE_TAG ist bereits vorhanden." >&2
+            exit 1
+          fi
+
+      - name: GitHub-Release veröffentlichen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create "$RELEASE_TAG" dist/toniehopper.zip \
+            --target "$GITHUB_SHA" \
+            --title "TonieHopper $RELEASE_VERSION" \
+            --generate-notes
